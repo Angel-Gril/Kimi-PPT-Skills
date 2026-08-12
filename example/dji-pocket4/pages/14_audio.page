@@ -1,0 +1,114 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: img1
+    elementType: image
+    bounds: [520, 110, 392, 186]
+    src: "media/osmoaudio.jpg"
+    fit: {mode: cover}
+  - elementId: img2
+    elementType: image
+    bounds: [520, 312, 392, 180]
+    src: "media/mic3.jpg"
+    fit: {mode: cover}
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 14 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 音频与生态 AUDIO & ECOSYSTEM
+  - elementId: title
+    elementType: text
+    bounds: [48, 116, 430, 100]
+    content:
+      style: "$pageTitle"
+      align: [left, top]
+      text: |
+        <p><strong>OsmoAudio，</strong></p>
+        <p><strong>声临其境</strong></p>
+  - elementId: body
+    elementType: text
+    bounds: [48, 236, 400, 136]
+    content:
+      style: "$body"
+      align: [left, top]
+      text: OsmoAudio 直连 DJI Mic 3 发射器，无需接收器即可四声道同步录制；新增空间音频与变焦拾音，声音随画面远近变化，临场感倍增。机身三麦克风阵列，48kHz 16-bit 高清收音。
+  - elementId: stats-line
+    elementType: shape
+    bounds: [48, 396, 400, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: stat1
+    elementType: text
+    bounds: [48, 412, 124, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>4 声道</strong>"
+  - elementId: stat1-label
+    elementType: text
+    bounds: [48, 442, 124, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 同步录制
+  - elementId: stat2
+    elementType: text
+    bounds: [184, 412, 124, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>空间音频</strong>"
+  - elementId: stat2-label
+    elementType: text
+    bounds: [184, 442, 124, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 变焦拾音
+  - elementId: stat3
+    elementType: text
+    bounds: [320, 412, 140, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>Mic 3</strong>"
+  - elementId: stat3-label
+    elementType: text
+    bounds: [320, 442, 140, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 无线直连

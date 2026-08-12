@@ -1,0 +1,109 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [528, 48, 384, 444]
+    src: "media/activetrack.jpg"
+    fit: {mode: cover}
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 10 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 智能与操控 SMART & CONTROL
+  - elementId: title
+    elementType: text
+    bounds: [48, 116, 430, 100]
+    content:
+      style: "$pageTitle"
+      align: [left, top]
+      text: |
+        <p><strong>智能跟随 7.0，</strong></p>
+        <p><strong>镜头锁定主角</strong></p>
+  - elementId: body
+    elementType: text
+    bounds: [48, 236, 400, 136]
+    content:
+      style: "$body"
+      align: [left, top]
+      text: ActiveTrack 7.0 支持最高 4 倍变焦跟随，人群中也能精准锁定主体。开启「锁定主角追焦」，镜头自动锁定目标并持续跟焦，轻点屏幕即可切换对象；「登记主角优先」，让重要的人始终清晰。挥挥手，手势控制即刻开拍。
+  - elementId: stats-line
+    elementType: shape
+    bounds: [48, 396, 400, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: stat1
+    elementType: text
+    bounds: [48, 412, 124, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>7.0</strong>"
+  - elementId: stat1-label
+    elementType: text
+    bounds: [48, 442, 124, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 智能跟随
+  - elementId: stat2
+    elementType: text
+    bounds: [184, 412, 124, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>4×</strong>"
+  - elementId: stat2-label
+    elementType: text
+    bounds: [184, 442, 124, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 变焦跟随
+  - elementId: stat3
+    elementType: text
+    bounds: [320, 412, 140, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>0 接触</strong>"
+  - elementId: stat3-label
+    elementType: text
+    bounds: [320, 442, 140, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 手势控制开拍

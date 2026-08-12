@@ -1,0 +1,72 @@
+pageType: content
+background:
+  type: image
+  src: media/yu7-performance.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: perf-wash
+    elementType: shape
+    bounds: [0, 0, 480, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#071013D0"}
+  - elementId: perf-index
+    elementType: text
+    bounds: [58, 42, 200, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "04 / PERFORMANCE"
+  - elementId: perf-title
+    elementType: text
+    bounds: [58, 92, 390, 110]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:42px;font-weight:700">快，不必牺牲从容</span></p>
+        <p><span style="font-size:20px;color:#FF6900;font-weight:700">YU7 Max · 性能旗舰</span></p>
+  - elementId: perf-stats
+    elementType: text
+    bounds: [60, 250, 360, 150]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:59px;font-weight:700;color:#FF6900">3.23</span><span style="font-size:19px"> s</span><span style="font-size:15px;color:#C9D0D4">　0—100 km/h</span></p>
+        <p><span style="font-size:32px;font-weight:700">508 kW</span><span style="font-size:15px;color:#C9D0D4">　最大功率</span></p>
+        <p><span style="font-size:32px;font-weight:700">253 km/h</span><span style="font-size:15px;color:#C9D0D4">　最高时速</span></p>
+  - elementId: perf-caption
+    elementType: text
+    bounds: [60, 435, 350, 38]
+    content:
+      fontFamily: MiSans
+      color: "$muted"
+      fontSize: 14
+      text: "性能被放进电机、底盘与整车稳定性里。"
+  - elementId: perf-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "数据来源：<a href=\"https://www.mi.com/global/discover/article?id=4925\">Xiaomi Global · YU7 launch</a>；图片：小米汽车官网"
+animations:
+  - elementId: perf-title
+    effect: fly-in
+    direction: right
+    trigger: afterPrevious
+    durationMs: 600
+    easing: ease-out
+  - elementId: perf-stats
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 650
+    easing: ease-out
+  - elementId: perf-caption
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 450

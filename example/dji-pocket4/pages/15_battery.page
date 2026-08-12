@@ -1,0 +1,130 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 15 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 音频与生态 AUDIO & ECOSYSTEM
+  - elementId: title
+    elementType: text
+    bounds: [48, 114, 500, 48]
+    content:
+      fontSize: 34
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>存储与续航，一步到位</strong>"
+  - elementId: grid-vline
+    elementType: shape
+    bounds: [479, 202, 1, 276]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: grid-hline
+    elementType: shape
+    bounds: [48, 336, 864, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: c1-num
+    elementType: text
+    bounds: [48, 210, 420, 56]
+    content:
+      fontSize: 48
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: |
+        <p><strong>107<span style="font-size:22px; color:$accent;"> GB</span></strong></p>
+  - elementId: c1-label
+    elementType: text
+    bounds: [48, 278, 420, 36]
+    content:
+      fontSize: 11.5
+      color: "$muted"
+      lineHeight: 1.55
+      align: [left, top]
+      text: 内置存储空间，另支持 microSD 卡扩展至 1TB
+  - elementId: c2-num
+    elementType: text
+    bounds: [504, 210, 408, 56]
+    content:
+      fontSize: 48
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: |
+        <p><strong>800<span style="font-size:22px; color:$accent;"> MB/s</span></strong></p>
+  - elementId: c2-label
+    elementType: text
+    bounds: [504, 278, 408, 36]
+    content:
+      fontSize: 11.5
+      color: "$muted"
+      lineHeight: 1.55
+      align: [left, top]
+      text: USB 3.1 有线极速导出，Wi-Fi 6 无线传输
+  - elementId: c3-num
+    elementType: text
+    bounds: [48, 356, 420, 56]
+    content:
+      fontSize: 48
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: |
+        <p><strong>240<span style="font-size:22px; color:$accent;"> min</span></strong></p>
+  - elementId: c3-label
+    elementType: text
+    bounds: [48, 424, 420, 36]
+    content:
+      fontSize: 11.5
+      color: "$muted"
+      lineHeight: 1.55
+      align: [left, top]
+      text: 满电连续拍摄时长，全天创作不断电
+  - elementId: c4-num
+    elementType: text
+    bounds: [504, 356, 408, 56]
+    content:
+      fontSize: 48
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: |
+        <p><strong>18<span style="font-size:22px; color:$accent;"> min</span></strong></p>
+  - elementId: c4-label
+    elementType: text
+    bounds: [504, 424, 408, 36]
+    content:
+      fontSize: 11.5
+      color: "$muted"
+      lineHeight: 1.55
+      align: [left, top]
+      text: PD 快充充至 80%，32 分钟充满 100%

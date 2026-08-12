@@ -1,0 +1,118 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [0, 0, 468, 540]
+    src: "media/horse_dusk_bl.jpg"
+    fit: {mode: cover}
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 06 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [536, 88, 376, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 影像画质 IMAGE QUALITY
+  - elementId: title
+    elementType: text
+    bounds: [536, 116, 376, 100]
+    content:
+      style: "$pageTitle"
+      align: [left, top]
+      text: |
+        <p><strong>14 档动态范围，</strong></p>
+        <p><strong>光影层次分明</strong></p>
+  - elementId: body
+    elementType: text
+    bounds: [536, 236, 376, 110]
+    content:
+      style: "$body"
+      align: [left, top]
+      text: 大光比场景下，高光与阴影细节兼得。支持 10-bit D-Log 专业色彩模式（上代为 D-Log M），色彩过渡平滑自然，为后期调色留足电影级空间。
+  - elementId: stats-line
+    elementType: shape
+    bounds: [536, 360, 376, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: stat1
+    elementType: text
+    bounds: [536, 376, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>14 档</strong>"
+  - elementId: stat1-label
+    elementType: text
+    bounds: [536, 406, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 动态范围
+  - elementId: stat2
+    elementType: text
+    bounds: [664, 376, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>10-bit</strong>"
+  - elementId: stat2-label
+    elementType: text
+    bounds: [664, 406, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: D-Log 色彩
+  - elementId: stat3
+    elementType: text
+    bounds: [792, 376, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>+2 档</strong>"
+  - elementId: stat3-label
+    elementType: text
+    bounds: [792, 406, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 低光能力提升
+  - elementId: footnote
+    elementType: text
+    bounds: [536, 498, 376, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [left, middle]
+      text: 数据来源：DJI 官方新闻稿，2026-04

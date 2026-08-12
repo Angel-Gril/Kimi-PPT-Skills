@@ -1,0 +1,139 @@
+pageType: final
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 18 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 规格与售价 SPECS & PRICE
+  - elementId: title
+    elementType: text
+    bounds: [48, 114, 560, 48]
+    content:
+      fontSize: 34
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>2999 元起，增配降价</strong>"
+  - elementId: p1-label
+    elementType: text
+    bounds: [48, 196, 200, 22]
+    content:
+      fontSize: 15
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>标准套装</strong>"
+  - elementId: p1-price
+    elementType: text
+    bounds: [48, 224, 300, 56]
+    content:
+      fontSize: 44
+      color: "$accent"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>¥2999</strong>"
+  - elementId: p1-items
+    elementType: text
+    bounds: [48, 290, 380, 60]
+    content:
+      fontSize: 10.5
+      color: "$muted"
+      lineHeight: 1.7
+      align: [left, top]
+      text: |
+        <p>主相机 · 云台夹 · 1/4″ 螺纹手柄</p>
+        <p>便携收纳袋 · USB-C PD 快充线（USB 3.1）</p>
+  - elementId: price-vline
+    elementType: shape
+    bounds: [479, 196, 1, 154]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: p2-label
+    elementType: text
+    bounds: [520, 196, 200, 22]
+    content:
+      fontSize: 15
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>全能套装</strong>"
+  - elementId: p2-price
+    elementType: text
+    bounds: [520, 224, 300, 56]
+    content:
+      fontSize: 44
+      color: "$accent"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>¥3799</strong>"
+  - elementId: p2-items
+    elementType: text
+    bounds: [520, 290, 392, 60]
+    content:
+      fontSize: 10.5
+      color: "$muted"
+      lineHeight: 1.7
+      align: [left, top]
+      text: |
+        <p>含标准套装全部配件，另加 DJI Mic 3 发射器、</p>
+        <p>补光灯、增广镜、迷你三脚架、收纳包</p>
+  - elementId: mid-line
+    elementType: shape
+    bounds: [48, 384, 864, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: closing
+    elementType: text
+    bounds: [48, 406, 864, 48]
+    content:
+      fontSize: 28
+      color: "$text"
+      wrap: false
+      align: [center, middle]
+      text: "<strong>大片生活，即刻呈现。</strong>"
+  - elementId: teaser
+    elementType: text
+    bounds: [48, 462, 864, 20]
+    content:
+      fontSize: 13
+      color: "$accent"
+      wrap: false
+      align: [center, middle]
+      text: 彩蛋 · 双摄版 Osmo Pocket 4P，年内登场
+  - elementId: source
+    elementType: text
+    bounds: [48, 510, 720, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [left, middle]
+      text: 资料来源：DJI 官网新闻稿（2026-04-16）· DJI 官方商城 · 中关村在线；图片来自 DJI 官方 CDN

@@ -1,0 +1,70 @@
+pageType: cover
+background:
+  type: image
+  src: media/yu7-hero.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: cover-wash
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#00000072"}
+  - elementId: cover-rule
+    elementType: shape
+    bounds: [58, 44, 72, 4]
+    shapeName: rect
+    fill: {type: solid, color: "$orange"}
+  - elementId: cover-meta
+    elementType: text
+    bounds: [58, 58, 700, 22]
+    content:
+      fontFamily: MiSans
+      color: "$muted"
+      fontSize: 12
+      letterSpacing: 2
+      text: "XIAOMI EV  /  YU7  /  2025 PRODUCT STORY"
+  - elementId: cover-title
+    elementType: text
+    bounds: [58, 206, 560, 120]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      align: [left, middle]
+      text: |
+        <p><span style="font-size:76px;font-weight:700;letter-spacing:-2px">小米 YU7</span></p>
+        <p><span style="font-size:24px;color:#FF6900;font-weight:700">从容奔赴 · 伟大旅程</span></p>
+  - elementId: cover-subtitle
+    elementType: text
+    bounds: [60, 366, 380, 64]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      fontSize: 17
+      lineHeight: 1.35
+      text: |
+        <p>跑车级姿态，SUV 的从容。</p>
+        <p>一台把长途旅行做成日常的纯电 SUV。</p>
+  - elementId: cover-source
+    elementType: text
+    bounds: [60, 494, 800, 18]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "图片 / 资料：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7</a>（访问：2026-08-06）"
+animations:
+  - elementId: cover-title
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 700
+    easing: ease-out
+  - elementId: cover-subtitle
+    effect: fly-in
+    direction: up
+    trigger: afterPrevious
+    durationMs: 550
+    easing: ease-out
+  - elementId: cover-meta
+    effect: fade-in
+    trigger: withPrevious
+    durationMs: 450

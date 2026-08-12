@@ -1,0 +1,54 @@
+{
+  "name": "open-kimi-ppt-skills",
+  "version": "1.2.0",
+  "description": "Hardened unofficial Kimi Slides skill with editable PPTX export, visual QA, and secure dedicated-browser authentication.",
+  "license": "MIT",
+  "author": "Binaryify Zhuang and contributors",
+  "homepage": "https://github.com/Angel-Gril/Kimi-PPT-Skills#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Angel-Gril/Kimi-PPT-Skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Angel-Gril/Kimi-PPT-Skills/issues"
+  },
+  "keywords": [
+    "ppt",
+    "pptx",
+    "slides",
+    "presentation",
+    "pptd",
+    "kimi",
+    "agent-skill",
+    "codex",
+    "claude-code",
+    "cursor",
+    "codebuddy"
+  ],
+  "type": "module",
+  "bin": {
+    "open-kimi-ppt-skills": "bin/open-kimi-ppt-skills.js"
+  },
+  "files": [
+    "bin/",
+    "editor/",
+    "lib/",
+    "skills/open-kimi-ppt/SKILL.md",
+    "skills/open-kimi-ppt/reference/",
+    "skills/open-kimi-ppt/scripts/*.py",
+    "skills/open-kimi-ppt/scripts/export_host.html",
+    "skills/open-kimi-ppt/requirements.txt",
+    "README.md",
+    "README_EN.md",
+    "theme.md",
+    "theme_EN.md"
+  ],
+  "scripts": {
+    "test": "node --test && python -m unittest discover -s skills/open-kimi-ppt/tests -p \"test_*.py\" && python scripts/check_sensitive.py && node scripts/check_package.mjs",
+    "pack:check": "node scripts/check_package.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

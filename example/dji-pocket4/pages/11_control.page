@@ -1,0 +1,119 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [528, 48, 384, 444]
+    src: "media/inhand.jpg"
+    fit: {mode: cover}
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 11 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 智能与操控 SMART & CONTROL
+  - elementId: title
+    elementType: text
+    bounds: [48, 116, 460, 52]
+    content:
+      style: "$pageTitle"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>轻转屏幕，即刻开拍</strong>"
+  - elementId: body
+    elementType: text
+    bounds: [48, 180, 420, 74]
+    content:
+      style: "$body"
+      align: [left, top]
+      text: 三轴云台随旋屏即刻响应，横竖拍无缝切换；2.0 英寸 OLED 触控屏，1000 尼特亮度，阳光下依然清晰可见。
+  - elementId: f1-name
+    elementType: text
+    bounds: [48, 272, 400, 22]
+    content:
+      fontSize: 15
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>屏下双按键</strong>"
+  - elementId: f1-desc
+    elementType: text
+    bounds: [48, 298, 420, 16]
+    content:
+      fontSize: 11
+      color: "$muted"
+      wrap: false
+      align: [left, middle]
+      text: 变焦键单击切换 1×/2×、双击 4×；自定义键长按触发预设
+  - elementId: f1-line
+    elementType: shape
+    bounds: [48, 326, 420, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: f2-name
+    elementType: text
+    bounds: [48, 348, 400, 22]
+    content:
+      fontSize: 15
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>五维摇杆</strong>"
+  - elementId: f2-desc
+    elementType: text
+    bounds: [48, 374, 420, 16]
+    content:
+      fontSize: 11
+      color: "$muted"
+      wrap: false
+      align: [left, middle]
+      text: 单击返回菜单，双击云台回中，三击切换前后镜头朝向
+  - elementId: f2-line
+    elementType: shape
+    bounds: [48, 402, 420, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: f3-name
+    elementType: text
+    bounds: [48, 424, 400, 22]
+    content:
+      fontSize: 15
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>旋转屏开拍</strong>"
+  - elementId: f3-desc
+    elementType: text
+    bounds: [48, 450, 420, 16]
+    content:
+      fontSize: 11
+      color: "$muted"
+      wrap: false
+      align: [left, middle]
+      text: 轻转屏幕云台即刻响应，竖拍横拍随心切换

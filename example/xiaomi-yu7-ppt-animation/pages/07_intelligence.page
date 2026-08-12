@@ -1,0 +1,74 @@
+pageType: content
+background:
+  type: image
+  src: media/yu7-tech.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: intel-wash
+    elementType: shape
+    bounds: [0, 0, 530, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#05080CD9"}
+  - elementId: intel-index
+    elementType: text
+    bounds: [58, 42, 230, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "06 / INTELLIGENCE"
+  - elementId: intel-title
+    elementType: text
+    bounds: [58, 92, 420, 105]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:42px;font-weight:700">智能能力，藏在日常里</span></p>
+        <p><span style="font-size:19px;color:#FF6900;font-weight:700">从“能用”到“好用”</span></p>
+  - elementId: intel-body
+    elementType: text
+    bounds: [60, 230, 390, 118]
+    content:
+      fontFamily: MiSans
+      color: "$muted"
+      fontSize: 16
+      lineHeight: 1.45
+      text: |
+        <p>HyperVision 全景显示、智能座舱、</p>
+        <p>高算力辅助驾驶硬件，</p>
+        <p>共同把“信息”变成自然的体验。</p>
+  - elementId: intel-stats
+    elementType: text
+    bounds: [60, 390, 410, 94]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:34px;font-weight:700;color:#FF6900">700 TOPS</span><span style="font-size:15px;color:#C9D0D4"> DRIVE AGX Thor</span></p>
+        <p><span style="font-size:15px;color:#C9D0D4">LiDAR　｜　11 个高清摄像头　｜　12 个超声波雷达</span></p>
+  - elementId: intel-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "资料来源：<a href=\"https://www.mi.com/global/discover/article?id=5174\">Xiaomi Global · YU7 intelligent cabin</a>；图片：小米汽车官网"
+animations:
+  - elementId: intel-title
+    effect: fly-in
+    direction: right
+    trigger: afterPrevious
+    durationMs: 600
+    easing: ease-out
+  - elementId: intel-body
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 500
+  - elementId: intel-stats
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 550

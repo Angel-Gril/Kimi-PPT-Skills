@@ -1,0 +1,53 @@
+version: v2
+title: DJI Osmo Pocket 4 产品深度解读
+size: [960, 540]
+theme:
+  colors:
+    bg: "#0C0C0E"
+    surface: "#17171C"
+    line: "#2A2A31"
+    text: "#F2F0EA"
+    muted: "#8E8E96"
+    accent: "#D9A441"
+  textStyles:
+    kicker:
+      fontSize: 10
+      color: "$accent"
+      letterSpacing: 3
+    pageTitle:
+      fontSize: 36
+      color: "$text"
+      lineHeight: 1.35
+    body:
+      fontSize: 13
+      color: "$muted"
+      lineHeight: 1.75
+    statNum:
+      fontSize: 20
+      color: "$text"
+    statLabel:
+      fontSize: 10
+      color: "$muted"
+    headerLabel:
+      fontSize: 9
+      color: "$muted"
+      letterSpacing: 3
+pages:
+  - pages/01_cover.page
+  - pages/02_highlights.page
+  - pages/03_toc.page
+  - pages/04_chapter1.page
+  - pages/05_cmos.page
+  - pages/06_dlog.page
+  - pages/07_slowmo.page
+  - pages/08_zoom.page
+  - pages/09_chapter2.page
+  - pages/10_tracking.page
+  - pages/11_control.page
+  - pages/12_gimbal.page
+  - pages/13_chapter3.page
+  - pages/14_audio.page
+  - pages/15_battery.page
+  - pages/16_accessories.page
+  - pages/17_specs.page
+  - pages/18_price.page

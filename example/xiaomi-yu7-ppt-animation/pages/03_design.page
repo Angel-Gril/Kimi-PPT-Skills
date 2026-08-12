@@ -1,0 +1,80 @@
+pageType: content
+background:
+  type: image
+  src: media/yu7-detail.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: design-wash
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#0000004C"}
+  - elementId: design-topline
+    elementType: line
+    bounds: [58, 46, 844, 1]
+    viewBox: [844, 1]
+    points: "0,0.5 844,0.5"
+    border: {style: solid, width: 1, color: "#FFFFFF7A"}
+  - elementId: design-index
+    elementType: text
+    bounds: [58, 58, 160, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "02 / DESIGN"
+  - elementId: design-title
+    elementType: text
+    bounds: [58, 88, 560, 74]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:44px;font-weight:700">长车头，宽体，低趴</span></p>
+        <p><span style="font-size:19px;color:#D8DFE2">一眼看上去，就知道它在向前</span></p>
+  - elementId: design-callout
+    elementType: text
+    bounds: [62, 186, 270, 168]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:72px;font-weight:700;color:#FF6900">1:3</span></p>
+        <p><span style="font-size:16px;color:#D8DFE2">头身比</span></p>
+        <p style="margin-top:14px"><span style="font-size:17px">让 SUV 也有跑车的第一眼张力。</span></p>
+  - elementId: design-labels
+    elementType: text
+    bounds: [58, 390, 460, 74]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      fontSize: 16
+      lineHeight: 1.45
+      text: |
+        <p>3.11㎡ 蚌式铝机盖　｜　0.245 超低风阻</p>
+        <p><span style="color:#C9D0D4">10 组贯穿式风道　｜　19 个风口　｜　流线型尾部</span></p>
+  - elementId: design-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "数据来源：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7 外观设计</a>；数据来自小米汽车实验室"
+animations:
+  - elementId: design-title
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 500
+  - elementId: design-callout
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 600
+    easing: ease-out
+  - elementId: design-labels
+    effect: fly-in
+    direction: up
+    trigger: afterPrevious
+    durationMs: 500

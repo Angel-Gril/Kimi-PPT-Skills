@@ -1,0 +1,71 @@
+pageType: content
+background:
+  type: image
+  src: media/yu7-hero.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: range-wash
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#00000070"}
+  - elementId: range-index
+    elementType: text
+    bounds: [58, 42, 160, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "05 / RANGE"
+  - elementId: range-title
+    elementType: text
+    bounds: [58, 95, 520, 90]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:44px;font-weight:700">长途，不应被充电打断</span></p>
+        <p><span style="font-size:19px;color:#D8DFE2">高压平台，把“出发”交还给生活</span></p>
+  - elementId: range-big
+    elementType: text
+    bounds: [58, 238, 490, 118]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:84px;font-weight:700;color:#FF6900">835</span><span style="font-size:25px"> km</span></p>
+        <p><span style="font-size:17px;color:#C9D0D4">CLTC 最长续航（标准版）</span></p>
+  - elementId: range-secondary
+    elementType: text
+    bounds: [60, 400, 460, 70]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:31px;font-weight:700">12 min</span><span style="font-size:15px;color:#C9D0D4">　10% → 80%</span></p>
+        <p><span style="font-size:15px;color:#C9D0D4">15 分钟补能，最高可增加约 620 km 续航</span></p>
+  - elementId: range-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "数据来源：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7</a>；续航 / 充电数据以车型配置与测试条件为准"
+animations:
+  - elementId: range-title
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 500
+  - elementId: range-big
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 700
+    easing: ease-out
+  - elementId: range-secondary
+    effect: fly-in
+    direction: up
+    trigger: afterPrevious
+    durationMs: 500

@@ -1,0 +1,66 @@
+pageType: cover
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: hero
+    elementType: image
+    bounds: [0, 0, 960, 540]
+    src: "media/hero_sunset.jpg"
+    fit: {mode: cover}
+  - elementId: overlay
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill:
+      type: gradient
+      gradientType: linear
+      angle: 90
+      stops:
+        - {position: 0, color: "#0C0C0E59"}
+        - {position: 0.55, color: "#0C0C0E40"}
+        - {position: 1, color: "#0C0C0EF2"}
+  - elementId: meta
+    elementType: text
+    bounds: [48, 40, 620, 16]
+    content:
+      fontSize: 10.5
+      color: "#F2F0EACC"
+      letterSpacing: 2
+      wrap: false
+      align: [left, middle]
+      text: DJI 大疆创新 · 2026.04.16 深圳发布
+  - elementId: title-bar
+    elementType: shape
+    bounds: [48, 262, 56, 4]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: title
+    elementType: text
+    bounds: [48, 282, 780, 200]
+    content:
+      fontSize: 76
+      color: "$text"
+      lineHeight: 1.24
+      align: [left, top]
+      text: |
+        <p><strong>一寸万象</strong></p>
+        <p><strong>光影随行</strong></p>
+  - elementId: subtitle
+    elementType: text
+    bounds: [48, 490, 700, 18]
+    content:
+      fontSize: 13
+      color: "#F2F0EACC"
+      wrap: false
+      align: [left, middle]
+      text: Osmo Pocket 4 · 一英寸口袋云台相机 产品深度解读
+  - elementId: price-note
+    elementType: text
+    bounds: [580, 510, 348, 14]
+    content:
+      fontSize: 10
+      color: "#8E8E96CC"
+      wrap: false
+      align: [right, middle]
+      text: 标准套装 ¥2999 起 · 全能套装 ¥3799

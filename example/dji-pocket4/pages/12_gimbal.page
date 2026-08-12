@@ -1,0 +1,109 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: side-img
+    elementType: image
+    bounds: [0, 0, 468, 540]
+    src: "media/tripod_street_bl.jpg"
+    fit: {mode: cover}
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 12 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [536, 88, 376, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 智能与操控 SMART & CONTROL
+  - elementId: title
+    elementType: text
+    bounds: [536, 116, 376, 100]
+    content:
+      style: "$pageTitle"
+      align: [left, top]
+      text: |
+        <p><strong>三轴机械增稳，</strong></p>
+        <p><strong>稳如滑轨</strong></p>
+  - elementId: body
+    elementType: text
+    bounds: [536, 236, 376, 116]
+    content:
+      style: "$body"
+      align: [left, top]
+      text: 三轴机械增稳云台，增稳精度 ±0.005°，最大操控转速 180°/s。走动、奔跑、车载跟拍，画面始终平稳顺滑——机械增稳不裁切画面，画质零损失。
+  - elementId: stats-line
+    elementType: shape
+    bounds: [536, 364, 376, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: stat1
+    elementType: text
+    bounds: [536, 380, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>±0.005°</strong>"
+  - elementId: stat1-label
+    elementType: text
+    bounds: [536, 410, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 增稳精度
+  - elementId: stat2
+    elementType: text
+    bounds: [664, 380, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>180°/s</strong>"
+  - elementId: stat2-label
+    elementType: text
+    bounds: [664, 410, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 最大操控转速
+  - elementId: stat3
+    elementType: text
+    bounds: [792, 380, 120, 26]
+    content:
+      style: "$statNum"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>-120°~70°</strong>"
+  - elementId: stat3-label
+    elementType: text
+    bounds: [792, 410, 120, 14]
+    content:
+      style: "$statLabel"
+      wrap: false
+      align: [left, middle]
+      text: 云台俯仰范围

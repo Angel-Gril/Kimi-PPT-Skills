@@ -1,0 +1,114 @@
+pageType: content
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: hd-bar
+    elementType: shape
+    bounds: [48, 34, 4, 12]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: hd-label
+    elementType: text
+    bounds: [60, 32, 260, 15]
+    content:
+      style: "$headerLabel"
+      wrap: false
+      align: [left, middle]
+      text: DJI OSMO POCKET 4
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [right, middle]
+      text: 17 / 18
+  - elementId: kicker
+    elementType: text
+    bounds: [48, 88, 400, 14]
+    content:
+      style: "$kicker"
+      wrap: false
+      align: [left, middle]
+      text: 规格与售价 SPECS & PRICE
+  - elementId: title
+    elementType: text
+    bounds: [48, 114, 500, 44]
+    content:
+      fontSize: 34
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>技术规格全览</strong>"
+  - elementId: spec-table
+    elementType: table
+    bounds: [48, 176, 540, 322]
+    columnWidths: [0.3, 0.7]
+    rowHeights: [0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.084, 0.084, 0.084, 0.084]
+    style:
+      fontSize: 10.5
+      bodyColor: "$text"
+      headerBold: false
+      firstColumnColor: "$muted"
+      border: [null, null, {style: solid, width: 0.75, color: "$line"}, null]
+    rows:
+      - - content: {text: 机身尺寸, align: [left, middle]}
+        - content: {text: 144.2 × 44.4 × 33.5 mm, align: [left, middle]}
+      - - content: {text: 机身重量, align: [left, middle]}
+        - content: {text: 190.5 g, align: [left, middle]}
+      - - content: {text: 传感器, align: [left, middle]}
+        - content: {text: 1 英寸堆栈式 CMOS, align: [left, middle]}
+      - - content: {text: 镜头, align: [left, middle]}
+        - content: {text: 等效 20 mm · f/2.0 光圈, align: [left, middle]}
+      - - content: {text: 照片, align: [left, middle]}
+        - content: {text: 约 3700 万像素（7680 × 4320）, align: [left, middle]}
+      - - content: {text: 视频, align: [left, middle]}
+        - content: {text: 4K/240fps 慢动作 · 1080p/240fps, align: [left, middle]}
+      - - content: {text: 动态范围, align: [left, middle]}
+        - content: {text: 14 档 · 10-bit D-Log 色彩, align: [left, middle]}
+      - - content: {text: 屏幕, align: [left, middle]}
+        - content: {text: 2.0″ OLED 触控旋转屏 · 1000 尼特, align: [left, middle]}
+      - - content: {text: 存储, align: [left, middle]}
+        - content: {text: 内置 107GB · microSD 扩展至 1TB, align: [left, middle]}
+      - - content: {text: 电池, align: [left, middle]}
+        - content: {text: 1545mAh · 240 分钟续航 · 18 分钟充至 80%, align: [left, middle]}
+      - - content: {text: 传输, align: [left, middle]}
+        - content: {text: USB 3.1 800MB/s · Wi-Fi 6 · 蓝牙, align: [left, middle]}
+      - - content: {text: 音频, align: [left, middle]}
+        - content: {text: 三麦克风 · OsmoAudio 四声道, align: [left, middle]}
+  - elementId: product-img
+    elementType: image
+    bounds: [628, 176, 284, 160]
+    src: "media/product_black.jpg"
+    fit: {mode: cover}
+  - elementId: product-caption
+    elementType: text
+    bounds: [628, 344, 284, 14]
+    content:
+      fontSize: 9
+      color: "$muted"
+      wrap: false
+      align: [center, middle]
+      text: Osmo Pocket 4 标准套装
+  - elementId: product-price
+    elementType: text
+    bounds: [628, 366, 284, 44]
+    content:
+      color: "$accent"
+      align: [center, middle]
+      wrap: false
+      text: |
+        <p><span style="font-size:30px; color:$accent;"><strong>¥2999</strong></span><span style="font-size:12px; color:$muted;"> 起</span></p>
+  - elementId: product-note
+    elementType: text
+    bounds: [628, 420, 284, 60]
+    content:
+      fontSize: 10
+      color: "$muted"
+      lineHeight: 1.6
+      align: [center, top]
+      text: |
+        <p style="text-align:center">2026.04.16 国行现货开售</p>
+        <p style="text-align:center">全球其他地区 04.22 起发售</p>

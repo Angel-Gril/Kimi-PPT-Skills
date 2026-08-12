@@ -1,0 +1,80 @@
+pageType: final
+background:
+  type: image
+  src: media/yu7-exterior.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: summary-wash
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#071013A6"}
+  - elementId: summary-rule
+    elementType: shape
+    bounds: [58, 44, 72, 4]
+    shapeName: rect
+    fill: {type: solid, color: "$orange"}
+  - elementId: summary-index
+    elementType: text
+    bounds: [58, 58, 180, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "07 / TAKEAWAY"
+  - elementId: summary-title
+    elementType: text
+    bounds: [58, 106, 540, 90]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:49px;font-weight:700">YU7 的答案，很简单</span></p>
+        <p><span style="font-size:23px;color:#FF6900;font-weight:700">快 · 远 · 智能 · 从容</span></p>
+  - elementId: summary-body
+    elementType: text
+    bounds: [60, 248, 620, 125]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      fontSize: 23
+      lineHeight: 1.45
+      text: |
+        <p>它没有把 SUV 做成“更大的一台车”，</p>
+        <p>而是把速度、空间与科技，重新排成了同一条路。</p>
+  - elementId: summary-end
+    elementType: text
+    bounds: [60, 412, 500, 60]
+    content:
+      fontFamily: MiSans
+      color: "$muted"
+      fontSize: 17
+      text: |
+        <p>小米 YU7</p>
+        <p>让每一次出发，都更接近“伟大旅程”。</p>
+  - elementId: summary-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "图片 / 资料：<a href=\"https://www.xiaomiev.com/yu7\">小米汽车官网 YU7</a>；本页为产品信息摘要"
+animations:
+  - elementId: summary-title
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 650
+    easing: ease-out
+  - elementId: summary-body
+    effect: fly-in
+    direction: up
+    trigger: afterPrevious
+    durationMs: 600
+    easing: ease-out
+  - elementId: summary-end
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 500

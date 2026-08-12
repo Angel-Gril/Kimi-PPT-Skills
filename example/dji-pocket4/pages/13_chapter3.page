@@ -1,0 +1,77 @@
+pageType: chapter
+background:
+  type: solid
+  color: "$bg"
+elements:
+  - elementId: bg-img
+    elementType: image
+    bounds: [0, 0, 960, 540]
+    src: "media/picnic.jpg"
+    fit: {mode: cover}
+  - elementId: dim
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#0C0C0E99"}
+  - elementId: bottom-grad
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill:
+      type: gradient
+      gradientType: linear
+      angle: 90
+      stops:
+        - {position: 0, color: "#0C0C0E00"}
+        - {position: 1, color: "#0C0C0ED9"}
+  - elementId: ch-num
+    elementType: text
+    bounds: [48, 118, 400, 190]
+    content:
+      fontSize: 150
+      color: "$accent"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>03</strong>"
+  - elementId: ch-bar
+    elementType: shape
+    bounds: [48, 316, 56, 4]
+    shapeName: rect
+    fill: {type: solid, color: "$accent"}
+  - elementId: ch-eng
+    elementType: text
+    bounds: [48, 334, 400, 16]
+    content:
+      fontSize: 12
+      color: "$accent"
+      letterSpacing: 4
+      wrap: false
+      align: [left, middle]
+      text: AUDIO & ECOSYSTEM
+  - elementId: ch-title
+    elementType: text
+    bounds: [48, 356, 500, 64]
+    content:
+      fontSize: 50
+      color: "$text"
+      wrap: false
+      align: [left, middle]
+      text: "<strong>音频与生态</strong>"
+  - elementId: ch-sub
+    elementType: text
+    bounds: [48, 434, 560, 20]
+    content:
+      fontSize: 13
+      color: "#F2F0EACC"
+      wrap: false
+      align: [left, middle]
+      text: 从声音、存储到续航的全链路体验
+  - elementId: page-num
+    elementType: text
+    bounds: [856, 510, 72, 12]
+    content:
+      fontSize: 9
+      color: "#F2F0EA99"
+      wrap: false
+      align: [right, middle]
+      text: 13 / 18

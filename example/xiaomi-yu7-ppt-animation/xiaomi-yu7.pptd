@@ -1,0 +1,30 @@
+version: v2
+title: 小米 YU7｜介绍
+size: [960, 540]
+theme:
+  colors:
+    orange: "#FF6900"
+    white: "#FFFFFF"
+    muted: "#C9D0D4"
+    ink: "#11161A"
+  textStyles:
+    title:
+      fontFamily: MiSans
+      color: "$white"
+      fontSize: 42
+      bold: true
+      lineHeight: 0.98
+    body:
+      fontFamily: MiSans
+      color: "$white"
+      fontSize: 18
+      lineHeight: 1.35
+pages:
+  - pages/01_cover.page
+  - pages/02_position.page
+  - pages/03_design.page
+  - pages/04_cabin.page
+  - pages/05_performance.page
+  - pages/06_range.page
+  - pages/07_intelligence.page
+  - pages/08_summary.page

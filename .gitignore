@@ -1,0 +1,52 @@
+# Python-generated files
+**/__pycache__/**
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache/**
+**/.venv/**
+**/venv/**
+
+# Secrets and local configuration
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*token*
+*credentials*
+
+# Browser profiles and automation artifacts
+.open-kimi-ppt/
+browser-profile/
+playwright-report/
+test-results/
+*.crdownload
+
+# Generated presentation and QA artifacts
+.qa-images/
+*.pptx
+*.ppt
+*.pdf
+*.pptd.bak
+export-output/
+downloads/
+
+# Logs and temporary diagnostics
+*.log
+logs/
+tmp/
+temp/
+
+# IDE and OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Packaged artifacts
+*.tgz
+*.zip
+
+# Local skill install metadata
+_user_meta.json

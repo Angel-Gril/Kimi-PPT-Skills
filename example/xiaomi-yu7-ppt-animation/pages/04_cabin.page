@@ -1,0 +1,80 @@
+pageType: content
+background:
+  type: image
+  src: media/yu7-cabin.jpg
+  fit: {mode: cover}
+elements:
+  - elementId: cabin-wash
+    elementType: shape
+    bounds: [0, 0, 960, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#00000055"}
+  - elementId: cabin-panel
+    elementType: shape
+    bounds: [0, 0, 390, 540]
+    shapeName: rect
+    fill: {type: solid, color: "#11161AD9"}
+  - elementId: cabin-index
+    elementType: text
+    bounds: [58, 42, 160, 22]
+    content:
+      fontFamily: MiSans
+      color: "$orange"
+      fontSize: 12
+      bold: true
+      letterSpacing: 2
+      text: "03 / CABIN"
+  - elementId: cabin-title
+    elementType: text
+    bounds: [58, 91, 315, 132]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:40px;font-weight:700">座舱，</span></p>
+        <p><span style="font-size:40px;font-weight:700">不只是屏幕</span></p>
+        <p><span style="font-size:22px;color:#FF6900;font-weight:700">是第一排观景席</span></p>
+  - elementId: cabin-body
+    elementType: text
+    bounds: [60, 240, 278, 100]
+    content:
+      fontFamily: MiSans
+      color: "$muted"
+      fontSize: 16
+      lineHeight: 1.5
+      text: |
+        <p>把导航、车况与娱乐信息</p>
+        <p>放到自然视线里，</p>
+        <p>让驾驶少一点低头，多一点从容。</p>
+  - elementId: cabin-stats
+    elementType: text
+    bounds: [60, 380, 312, 92]
+    content:
+      fontFamily: MiSans
+      color: "$white"
+      text: |
+        <p><span style="font-size:31px;font-weight:700">1.1 m</span><span style="font-size:14px;color:#C9D0D4"> HyperVision 全景显示</span></p>
+        <p><span style="font-size:17px;color:#C9D0D4">三块 Mini LED　｜　108 PPD 视网膜级清晰度</span></p>
+  - elementId: cabin-source
+    elementType: text
+    bounds: [58, 508, 850, 16]
+    content:
+      fontFamily: MiSans
+      color: "#D8DFE2"
+      fontSize: 9
+      text: "资料来源：<a href=\"https://www.mi.com/global/discover/article?id=5174\">Xiaomi Global · YU7 cabin</a>；图源：小米汽车官网"
+animations:
+  - elementId: cabin-title
+    effect: fly-in
+    direction: right
+    trigger: afterPrevious
+    durationMs: 600
+    easing: ease-out
+  - elementId: cabin-body
+    effect: fade-in
+    trigger: afterPrevious
+    durationMs: 500
+  - elementId: cabin-stats
+    effect: zoom-in
+    trigger: afterPrevious
+    durationMs: 500
