@@ -12,14 +12,27 @@ self-contained. Callers that already own a generator should pass --pptx instead.
 from __future__ import annotations
 
 import io
+import argparse
 import json
+import math
 import re
 import zipfile
+import tempfile
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from xml.sax.saxutils import escape
 
-EMU_PER_PX = 9525
+import yaml
+
+from browser_export import BrowserExportError, exclusive_path_locks
+from export_pptx import (
+    ExportError, assert_safe_output_file, atomic_replace_file, find_manifest,
+    read_yaml_mapping, safe_project_path,
+)
+
+# PPTD defines 1px = 1pt, and OOXML uses 12700 EMU per point.
+EMU_PER_PX = 12700
 
 CT_HEAD = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -80,28 +93,73 @@ THEME = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 
 def _escape(text: str) -> str:
+    if re.search(r"[\x00-\x08\x0B\x0C\x0E-\x1F\uD800-\uDFFF\uFFFE\uFFFF]", text):
+        raise ExportError("text contains characters that XML cannot represent")
     return escape(text, {'"': "&quot;"})
 
 
 def _strip_html(html: str) -> str:
-    text = re.sub(r"<br\s*/?>", "\n", html or "", flags=re.I)
-    text = re.sub(r"</(p|div)>", "\n", text, flags=re.I)
-    text = re.sub(r"<[^>]+>", "", text)
-    for entity, char in (("&nbsp;", " "), ("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">")):
-        text = text.replace(entity, char)
-    return re.sub(r"\n{3,}", "\n\n", text).strip()
+    class PlainText(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.parts = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag == "br" or (tag in {"p", "div"} and self.parts and not self.parts[-1].endswith("\n")):
+                self.parts.append("\n")
+
+        def handle_endtag(self, tag):
+            if tag in {"p", "div"}:
+                self.parts.append("\n")
+
+        def handle_data(self, data):
+            self.parts.append(data)
+
+    parser = PlainText()
+    parser.feed(html)
+    parser.close()
+    return re.sub(r"\n{3,}", "\n\n", "".join(parser.parts)).strip()
+
+
+def _color(value: str, colors: Dict[str, str]) -> str:
+    seen = set()
+    while isinstance(value, str) and value.startswith("$"):
+        if value in seen or value[1:] not in colors:
+            raise ExportError(f"unknown or cyclic theme color: {value}")
+        seen.add(value)
+        value = colors[value[1:]]
+    if not isinstance(value, str) or not re.fullmatch(r"#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?|#[0-9A-Fa-f]{4}(?:[0-9A-Fa-f]{4})?", value):
+        raise ExportError(f"unsupported reference-renderer color: {value}")
+    value = value[1:]
+    if len(value) in (3, 4):
+        value = "".join(char * 2 for char in value)
+    return value.upper()
+
+
+def _solid_fill(color: str) -> str:
+    alpha = f'<a:alpha val="{round(int(color[6:], 16) / 255 * 100000)}"/>' if len(color) == 8 else ""
+    return f'<a:solidFill><a:srgbClr val="{color[:6]}">{alpha}</a:srgbClr></a:solidFill>'
+
+
+def _numbers(value: Any, count: int, label: str) -> List[float]:
+    if not isinstance(value, (list, tuple)) or len(value) != count:
+        raise ExportError(f"{label} must contain {count} numbers")
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value):
+        raise ExportError(f"{label} must contain finite numbers")
+    return [float(v) for v in value]
 
 
 def _text_box(shape_id: int, name: str, bounds: List[float], text: str,
-              size_pt: float, color: str, bold: bool) -> str:
+              size_pt: float, color: str, bold: bool, align: List[str], font: str) -> str:
     x, y, w, h = [float(v) for v in bounds]
     # NOTE: no backslash escapes inside f-string expressions -- CI runs Python 3.11,
     # where PEP 701 is unavailable; keep the attribute concatenation explicit.
     bold_attr = ' b="1"' if bold else ""
     paragraphs = "".join(
-        '<a:p><a:pPr algn="l"/><a:r><a:rPr lang="zh-CN" sz="{}"{} dirty="0">'
-        '<a:solidFill><a:srgbClr val="{}"/></a:solidFill></a:rPr><a:t>{}</a:t></a:r></a:p>'.format(
-            int(round(size_pt * 100)), bold_attr, color, _escape(line)
+        '<a:p><a:pPr algn="{}"/><a:r><a:rPr lang="zh-CN" sz="{}"{} dirty="0">'
+        '{}<a:latin typeface="{}"/><a:ea typeface="{}"/></a:rPr><a:t xml:space="preserve">{}</a:t></a:r></a:p>'.format(
+            {"left": "l", "center": "ctr", "right": "r", "justify": "just"}.get(align[0], "l"),
+            int(round(size_pt * 100)), bold_attr, _solid_fill(color), _escape(font), _escape(font), _escape(line)
         )
         for line in text.split("\n")
     )
@@ -111,7 +169,7 @@ def _text_box(shape_id: int, name: str, bounds: List[float], text: str,
         f'<p:spPr><a:xfrm><a:off x="{int(x * EMU_PER_PX)}" y="{int(y * EMU_PER_PX)}"/>'
         f'<a:ext cx="{int(w * EMU_PER_PX)}" cy="{int(h * EMU_PER_PX)}"/></a:xfrm>'
         f'<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>'
-        f'<p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0"><a:normAutofit/></a:bodyPr>'
+        f'<p:txBody><a:bodyPr wrap="square" anchor="{ {"top": "t", "middle": "ctr", "bottom": "b"}.get(align[1], "t") }" lIns="0" tIns="0" rIns="0" bIns="0"><a:normAutofit/></a:bodyPr>'
         f"<a:lstStyle/>{paragraphs}</p:txBody></p:sp>"
     )
 
@@ -120,12 +178,12 @@ def _slide_xml(page: Dict[str, Any]) -> str:
     bg = ""
     if page.get("bgColor"):
         bg = (
-            f'<p:bg><p:bgPr><a:solidFill><a:srgbClr val="{page["bgColor"]}"/></a:solidFill>'
+            f'<p:bg><p:bgPr>{_solid_fill(page["bgColor"])}'
             f"<a:effectLst/></p:bgPr></p:bg>"
         )
     shapes = "".join(
         _text_box(i + 2, f"Text {i + 1}", item["bounds"], item["text"],
-                  item["sizePt"], item["color"], item["bold"])
+                  item["sizePt"], item["color"], item["bold"], item["align"], item["font"])
         for i, item in enumerate(page["texts"])
     )
     return (
@@ -143,68 +201,75 @@ def _slide_xml(page: Dict[str, Any]) -> str:
     )
 
 
-def _parse_text_elements(raw: str) -> Tuple[Optional[str], List[Dict[str, Any]]]:
-    """Accept JSON pages (preferred) and fall back to a narrow YAML scan."""
-    page: Optional[Dict[str, Any]] = None
+def _parse_text_elements(raw: str, theme: Optional[Dict[str, Any]] = None) -> Tuple[Optional[str], List[Dict[str, Any]]]:
+    """Read both YAML and JSON pages without losing scalar text or geometry."""
     try:
-        page = json.loads(raw)
-    except (ValueError, TypeError):
-        page = None
-
-    if isinstance(page, dict):
-        background = page.get("background") or {}
-        bg_color = str(background.get("color") or "").lstrip("#") or None
-        texts: List[Dict[str, Any]] = []
-        for element in page.get("elements") or []:
-            if element.get("elementType") != "text":
-                continue
-            html = str((element.get("content") or {}).get("text") or "")
-            size = re.search(r"font-size:\s*(\d+)px", html)
-            color = re.search(r"color:\s*(#[0-9A-Fa-f]{3,8})", html)
-            texts.append({
-                "text": _strip_html(html),
-                "sizePt": round(int(size.group(1)) * 0.75) if size else 18,
-                "color": (color.group(1) if color else "#222222").lstrip("#"),
-                "bold": bool(re.search(r"font-weight:\s*(700|bold)", html)),
-                "bounds": element.get("bounds") or [80, 120, 800, 120],
-            })
-        return bg_color, texts
-
-    bg_match = re.search(r'background:\s*\{[^}]*color:\s*"?(#[0-9A-Fa-f]{3,8})"?', raw)
+        page = yaml.safe_load(raw)
+    except yaml.YAMLError as exc:
+        raise ExportError(f"invalid page YAML: {exc}") from exc
+    if not isinstance(page, dict) or not isinstance(page.get("elements"), list):
+        raise ExportError("page must be a mapping with an elements array")
+    theme = theme or {}
+    colors = theme.get("colors") or {}
+    background = page.get("background") or {}
+    bg_color = _color(background.get("color", "#FFFFFF"), colors) if background.get("type", "solid") == "solid" else "FFFFFF"
     texts = []
-    for index, block in enumerate(re.findall(r"text:\s*\|([\s\S]*?)(?=\n\s{0,10}\w+:|\n\s*$)", raw)):
-        size = re.search(r"font-size:\s*(\d+)px", block)
-        color = re.search(r"color:\s*(#[0-9A-Fa-f]{3,8})", block)
+    for element in page["elements"]:
+        if not isinstance(element, dict):
+            raise ExportError("page elements must be mappings")
+        if element.get("elementType") != "text":
+            continue
+        content = element.get("content") or {}
+        style_name = str(content.get("style") or "").lstrip("$")
+        style = {**(theme.get("textStyles", {}).get(style_name) or {}), **content}
+        html = str(content.get("text") or "")
+        size = re.search(r"font-size:\s*(\d+(?:\.\d+)?)(?:px|pt)", html, re.I)
+        color = re.search(r"(?:[;\"']|^)\s*color:\s*(#[0-9A-Fa-f]{3,8}|\$[\w-]+)", html)
+        bounds = _numbers(element.get("bounds"), 4, "text bounds")
+        if bounds[2] <= 0 or bounds[3] <= 0:
+            raise ExportError("text bounds width and height must be positive")
+        size_pt = float(size.group(1)) if size else float(style.get("fontSize", 18))
+        if not math.isfinite(size_pt) or not 1 <= size_pt <= 4000:
+            raise ExportError("text fontSize must be between 1 and 4000")
+        align = style.get("align", ["left", "top"])
+        if not isinstance(align, list) or len(align) != 2:
+            raise ExportError("text align must contain horizontal and vertical alignment")
+        font = style.get("fontFamily", "MiSans")
+        if isinstance(font, dict):
+            font = font.get("ea") or font.get("latin") or "MiSans"
         texts.append({
-            "text": _strip_html(block),
-            "sizePt": round(int(size.group(1)) * 0.75) if size else 18,
-            "color": (color.group(1) if color else "#222222").lstrip("#"),
-            "bold": bool(re.search(r"font-weight:\s*(700|bold)", block)),
-            "bounds": [80, 120 + index * 120, 800, 110],
+            "text": _strip_html(html),
+            "sizePt": size_pt,
+            "color": _color(color.group(1) if color else style.get("color", "#000000"), colors),
+            "bold": bool(style.get("bold") or re.search(r"font-weight:\s*(?:[6-9]00|bold)|<(?:strong|b)(?:\s|>)", html, re.I)),
+            "bounds": bounds,
+            "align": align,
+            "font": str(font),
         })
-    return (bg_match.group(1).lstrip("#") if bg_match else None), texts
+    return bg_color, texts
 
 
 def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
     """Render a PPTD project into PPTX bytes."""
-    manifest_path = Path(manifest_path)
-    manifest = manifest_path.read_text(encoding="utf-8")
+    manifest_path = Path(manifest_path).resolve()
+    _, manifest = read_yaml_mapping(manifest_path)
     root = manifest_path.parent
-
-    size = re.search(r"size:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]", manifest)
-    width, height = (int(size.group(1)), int(size.group(2))) if size else (960, 540)
-    page_refs = re.findall(r"^\s{2,}-\s+(\S+\.page)\s*$", manifest, re.M)
-    title = re.search(r"^title:\s*(.+)$", manifest, re.M)
+    if manifest.get("version") != "v2":
+        raise ExportError("reference rendering requires PPTD version: v2")
+    width, height = _numbers(manifest.get("size", [960, 540]), 2, "slide size")
+    if width <= 0 or height <= 0:
+        raise ExportError("slide size must be positive")
+    page_refs = manifest.get("pages")
+    if not isinstance(page_refs, list) or not page_refs:
+        raise ExportError("PPTD manifest must contain a non-empty pages list")
 
     pages = []
     for reference in page_refs:
-        path = root / reference
+        path = safe_project_path(root, reference)
         if not path.is_file():
             raise SystemExit(f"missing page file: {reference}")
-        bg_color, texts = _parse_text_elements(path.read_text(encoding="utf-8"))
+        bg_color, texts = _parse_text_elements(path.read_text(encoding="utf-8"), manifest.get("theme"))
         pages.append({"bgColor": bg_color, "texts": texts})
-    if not pages:
-        pages = [{"bgColor": None, "texts": []}]
 
     count = len(pages)
     entries: List[Tuple[str, str]] = []
@@ -267,7 +332,7 @@ def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
         for name, data in entries:
             archive.writestr(name, data)
     summary = {
-        "title": (title.group(1).strip().strip("\"'") if title else manifest_path.stem),
+        "title": str(manifest.get("title") or manifest_path.stem),
         "slides": count,
         "bytes": len(buffer.getvalue()),
         "renderer": "pptd_to_pptx (text/background/fade only)",
@@ -275,11 +340,29 @@ def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
     return buffer.getvalue(), summary
 
 
-if __name__ == "__main__":
-    import sys
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("manifest", type=Path)
+    parser.add_argument("output", type=Path, nargs="?")
+    parser.add_argument("--force", action="store_true", help="replace an existing PPTX")
+    args = parser.parse_args(argv)
+    try:
+        manifest = find_manifest(args.manifest)
+        out = (args.output or manifest.with_suffix(".pptx")).expanduser().resolve()
+        assert_safe_output_file(manifest, out)
+        with exclusive_path_locks([out]):
+            if out.exists() and not args.force:
+                raise ExportError(f"output already exists (pass --force to replace it): {out}")
+            data, info = build(manifest)
+            with tempfile.TemporaryDirectory(prefix="pptd-reference-") as name:
+                stage = Path(name) / "render.pptx"
+                stage.write_bytes(data)
+                atomic_replace_file(stage, out, force=args.force)
+        print(json.dumps({**info, "output": str(out)}, ensure_ascii=False))
+    except (ExportError, BrowserExportError, OSError) as exc:
+        parser.exit(1, f"reference render failed: {exc}\n")
+    return 0
 
-    manifest = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("deck.pptd")
-    data, info = build(manifest)
-    out = Path(sys.argv[2]) if len(sys.argv) > 2 else manifest.with_suffix(".pptx")
-    out.write_bytes(data)
-    print(json.dumps({**info, "output": str(out)}, ensure_ascii=False))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

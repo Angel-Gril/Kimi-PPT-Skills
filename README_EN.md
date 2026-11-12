@@ -239,6 +239,45 @@ deck/
 - Automatic export validates ZIP structure, slide count, transitions, and independent editable objects; an image-per-slide fallback is rejected by default.
 - HTTP 401 from `/apiv2/utils/v1/signatures` means the dedicated-profile login expired or partitioned authentication was not initialized; rerun in headed mode and sign in when prompted.
 
+## Optional host-side export without sign-in
+
+The default exporter uses Kimi's writer and requires sign-in. An optional host
+channel can download a pre-rendered PPTX without reading or saving login state:
+
+```bash
+# Limited reference renderer: text, solid backgrounds and fade transitions
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --auto-generate -o out.pptx
+
+# Use a PPTX produced by your own generator
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --pptx my-render.pptx -o out.pptx
+
+# Generate the reference file directly, without loading the browser editor
+python skills/open-kimi-ppt/scripts/pptd_to_pptx.py example/dji-pocket4/dji-pocket4.pptd out.pptx
+```
+
+The host page opts in with `?hostExport=1`, sets `sdkExportMode=external`, and
+returns the prepared file from `handleExport`. Later edits in the editor do not
+update the prepared download; the host displays a persistent notice. File bytes
+are passed through host RPC without granting the remote page local-network access.
+The browser channel still
+requires network access to Kimi and may make anonymous account requests; it does
+not use authenticated export signatures or a persistent browser profile.
+
+Both entry points check project paths and preserve existing outputs unless
+`--force` is supplied. Supplied PPTX files must have a valid package structure
+and the same page count as the project. Downloads are checked against the host
+artifact and validated before the destination is committed.
+
+> [!WARNING]
+> Output quality depends on your generator. The bundled reference renderer
+> preserves text, geometry, font sizes, theme colors, solid backgrounds and fade
+> transitions. Mixed rich-text styling is simplified; images, shapes, charts,
+> element animations and font embedding are omitted. Package integrity checks
+> do not establish official rendering quality or editability. Use the default
+> `export_pptx.py` for the official writer.
+
 ## Compatibility
 
 This is a compatibility host for the current public implementation, not a stable official SDK. Updates to Kimi frontend asset hashes, the PPTD format, or the iframe/RPC protocol may require a corresponding project update. Successfully generating a PPTX does not guarantee identical animation playback in PowerPoint, WPS, and Keynote.

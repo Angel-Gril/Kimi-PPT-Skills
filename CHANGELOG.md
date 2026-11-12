@@ -1,21 +1,27 @@
-## [Unreleased]
-
-### 新增
-- 宿主侧导出通道（可选）：`export_host.html?hostExport=1` 会向编辑器声明 `sdkExportMode=external`
-  并实现 `handleExport`，使 SDK 模式在**无 Kimi 账号**时也能导出 PPTX（编辑器降级为渲染器）。
-- `scripts/export_pptx_host.py`：无登录、无专用 Profile 的导出入口，支持 `--pptx`（外部产物）
-  与 `--auto-generate`（内置参考渲染器）。
-- `scripts/pptd_to_pptx.py`：PPTX 参考渲染器（文本 / 背景 / 淡入淡出 / 页序），仅作占位实现。
-
-### 说明
-- 默认行为未变：不带 `?hostExport=1` 时与旧路径完全一致，仍需登录走官方服务端渲染。
-- 参考渲染器**不产出**官方级画质（无图片/形状/图表/元素动画，不嵌字体）；需要官方效果请继续使用 `export_pptx.py`。
-
 # 更新日志
 
 [简体中文](CHANGELOG.md) | [English](CHANGELOG_EN.md)
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+
+## [Unreleased]
+
+### 新增
+
+- 可选宿主侧导出：无需 Kimi 账号或专用浏览器 Profile，下载提前生成的 PPTX；默认导出通道不变。
+- `export_pptx_host.py` 支持外部 `--pptx` 或内置 `--auto-generate`；`pptd_to_pptx.py` 可直接生成参考文件。
+- 参考渲染器保留 YAML/JSON 文本、坐标、字号、主题色、纯色背景、淡入淡出和页序。
+
+### 安全与验证
+
+- 复用已有的项目路径限制、引用图片筛选及体积限制；校验 PPTX 关系图、页数和下载内容。
+- 通过宿主 RPC 传递文件内容，兼容新版浏览器的本机网络访问限制。
+- 默认拒绝覆盖已有输出，支持显式 `--force`，使用输出锁及事务写入；页面持续提示下载的是预先生成的文件。
+- 为新通道、渲染器和默认宿主兼容性添加回归测试，CI 同时运行 Node 测试。
+
+### 说明
+
+- 参考渲染器会简化混合富文本样式，不包含图片、形状、图表、元素动画或字体嵌入。官方效果请使用 `export_pptx.py`。
 
 ## [1.2.0] - 2026-08-12
 
