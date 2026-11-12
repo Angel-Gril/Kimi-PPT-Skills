@@ -4,6 +4,25 @@
 
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Optional host-side export downloads a prepared PPTX without a Kimi account or persistent browser profile; the default exporter is unchanged.
+- `export_pptx_host.py` accepts `--pptx` or the limited `--auto-generate` renderer; `pptd_to_pptx.py` can generate reference files directly.
+- Reference rendering preserves YAML/JSON text, geometry, font sizes, theme colors, solid backgrounds, fade transitions and page order.
+
+### Security and validation
+
+- Reuse project path boundaries, referenced-image filtering and media limits; validate PPTX relationships, page counts and downloaded content.
+- Pass file bytes through host RPC to support current browser restrictions on local-network access.
+- Preserve existing output unless `--force` is supplied, using output locks and transactional writes. Display a persistent notice that the download is a prepared artifact.
+- Add regression coverage for both new entry points and default-host compatibility; run Node tests in CI.
+
+### Limitations
+
+- Mixed rich-text styling is simplified. Images, shapes, charts, element animations and font embedding are omitted; use `export_pptx.py` for the official writer.
+
 ## [1.2.0] - 2026-08-12
 
 ### Added

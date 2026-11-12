@@ -78,6 +78,13 @@
       };
 
       try {
+        // 宿主侧导出（可选）：?hostExport=1 时把 PPTX 交给宿主产出，编辑器仅渲染。
+        const bootstrap = new URLSearchParams(location.search);
+        const hostExport = bootstrap.get("hostExport") === "1";
+        const hostPptxUrl = hostExport
+          ? new URL(bootstrap.get("pptx") || "./deck.pptx", location.href).href
+          : null;
+
         const payload = await fetch("./payload.json", { cache: "no-store" }).then((response) => {
           if (!response.ok) throw new Error(`payload HTTP ${response.status}`);
           return response.json();
@@ -98,6 +105,7 @@
           }),
           sdkSaveMode: "external",
           sdkImageMode: "external",
+          ...(hostExport ? { sdkExportMode: "external" } : {}),
         });
 
         frame.addEventListener(
@@ -121,6 +129,31 @@
                   sendPrompt() {},
                   showMessage() {},
                   hideMessage() {},
+                  ...(hostExport
+                    ? {
+                        async handleExport() {
+                          const response = await fetch(hostPptxUrl, { cache: "no-store" });
+                          if (!response.ok) throw new Error(`host PPTX HTTP ${response.status}`);
+                          const artifact = await response.blob();
+                          if (!artifact.size) throw new Error("host PPTX is empty");
+                          // Pass the bytes through RPC so the remote iframe does not
+                          // need permission to fetch a localhost URL.
+                          const downloadUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = () => reject(new Error("could not read host PPTX"));
+                            reader.readAsDataURL(artifact);
+                          });
+                          return {
+                            downloadUrl,
+                            sizeBytes: artifact.size,
+                            pageCount: (payload.pages || []).length,
+                            reused: false,
+                            checkFailReason: "",
+                          };
+                        },
+                      }
+                    : {}),
                   onSave(savePayload) {
                     return {
                       fileContent: savePayload?.fileContent,
@@ -157,6 +190,7 @@
               await remote.setEditable(true);
               window.exportSlideStatus = await remote.getSlideStatus();
               setStatus("ready");
+              if (hostExport) status.textContent = "宿主导出下载预先生成的文件；页面编辑不会更新该文件";
             } catch (error) {
               window.exportHostError = String(error?.stack || error);
               setStatus("error");

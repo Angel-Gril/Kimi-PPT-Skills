@@ -26,5 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Run Node tests
+        run: node --test
       - name: Validate npm package contents
         run: node scripts/check_package.mjs

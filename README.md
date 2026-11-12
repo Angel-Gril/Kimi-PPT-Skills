@@ -251,6 +251,43 @@ deck/
 - 自动导出完成后检查 ZIP、页数、转场及独立可编辑对象；默认拒绝只有整页图片的伪可编辑 PPTX。
 - 若 `/apiv2/utils/v1/signatures` 返回 401，说明专用 Profile 登录已过期或分区认证未建立；重新运行并在可见浏览器中登录即可。
 
+## 宿主侧导出（可选，无需登录）
+
+默认导出走 Kimi 服务端渲染，需要登录。若目标只是"把 PPTD 落到 PPTX"而不要求官方画质，
+可以让宿主接管导出：
+
+```bash
+# 用内置参考渲染器（文本/纯色背景/淡入淡出）
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --auto-generate -o out.pptx
+
+# 或交给你自己的生成器
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --pptx my-render.pptx -o out.pptx
+```
+
+原理：宿主页带 `?hostExport=1` 打开时，会向编辑器声明 `sdkExportMode=external` 并实现
+`handleExport`，下载由宿主提前生成的 PPTX。下载内容固定为打开编辑器之前生成的文件，
+页面内的后续编辑不会更新下载内容；页面顶部会持续提示这一点。该通道不使用登录后的
+导出签名、不读取或保存登录态，也不需要专用浏览器 Profile；仍需联网加载 Kimi 编辑器，
+可能出现与导出无关的匿名账号查询请求。文件内容通过宿主 RPC 传递，无需给远程页面
+开放本机网络访问权限。
+
+若只需要参考渲染器的文件，可以直接运行，无需打开浏览器或联网加载编辑器：
+
+```bash
+python skills/open-kimi-ppt/scripts/pptd_to_pptx.py example/dji-pocket4/dji-pocket4.pptd out.pptx
+```
+
+两个入口均校验项目路径，默认保留已有输出；明确需要替换时添加 `--force`。`--pptx`
+文件必须是结构有效、页数与项目一致的 PPTX；下载后会再次校验文件内容和页数。
+
+> [!WARNING]
+> 这条通道的产物由宿主的生成器决定。内置参考渲染器只覆盖文本、纯色背景与淡入淡出，
+> 保留文本坐标、字号和主题色；混合富文本样式会简化，**不含**图片、形状、图表、元素动画
+> 与字体嵌入。文件完整性检查通过不代表达到官方画质；本通道不执行官方画质或可编辑性验收。
+> 需要官方画质时请勿使用本节，改用登录后的默认导出。
+
 ## 兼容性说明
 
 这是针对当前公开实现的兼容宿主，不是稳定的官方 SDK。Kimi 更新前端资源哈希、PPTD 格式或 iframe/RPC 协议后，本项目可能需要同步升级。成功生成 PPTX 也不代表 PowerPoint、WPS 和 Keynote 对所有动画效果都能完全一致地播放。
