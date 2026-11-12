@@ -78,6 +78,11 @@
       };
 
       try {
+        // 宿主侧导出（可选）：?hostExport=1 时把 PPTX 交给宿主产出，编辑器仅渲染。
+        const bootstrap = new URLSearchParams(location.search);
+        const hostExport = bootstrap.get("hostExport") === "1";
+        const hostPptxUrl = new URL(bootstrap.get("pptx") || "./deck.pptx", location.href).href;
+
         const payload = await fetch("./payload.json", { cache: "no-store" }).then((response) => {
           if (!response.ok) throw new Error(`payload HTTP ${response.status}`);
           return response.json();
@@ -98,6 +103,7 @@
           }),
           sdkSaveMode: "external",
           sdkImageMode: "external",
+          ...(hostExport ? { sdkExportMode: "external" } : {}),
         });
 
         frame.addEventListener(
@@ -121,6 +127,19 @@
                   sendPrompt() {},
                   showMessage() {},
                   hideMessage() {},
+                  ...(hostExport
+                    ? {
+                        handleExport() {
+                          return {
+                            downloadUrl: hostPptxUrl,
+                            sizeBytes: 0,
+                            pageCount: (payload.pages || []).length,
+                            reused: false,
+                            checkFailReason: "",
+                          };
+                        },
+                      }
+                    : {}),
                   onSave(savePayload) {
                     return {
                       fileContent: savePayload?.fileContent,

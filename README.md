@@ -251,6 +251,30 @@ deck/
 - 自动导出完成后检查 ZIP、页数、转场及独立可编辑对象；默认拒绝只有整页图片的伪可编辑 PPTX。
 - 若 `/apiv2/utils/v1/signatures` 返回 401，说明专用 Profile 登录已过期或分区认证未建立；重新运行并在可见浏览器中登录即可。
 
+## 宿主侧导出（可选，无需登录）
+
+默认导出走 Kimi 服务端渲染，需要登录。若目标只是"把 PPTD 落到 PPTX"而不要求官方画质，
+可以让宿主接管导出：
+
+```bash
+# 用内置参考渲染器（文本/背景/淡入淡出）
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --auto-generate -o out.pptx
+
+# 或交给你自己的生成器
+python skills/open-kimi-ppt/scripts/export_pptx_host.py \
+  --project example/dji-pocket4 --pptx my-render.pptx -o out.pptx
+```
+
+原理：宿主页带 `?hostExport=1` 打开时，会向编辑器声明 `sdkExportMode=external` 并实现
+`handleExport`；编辑器随即把导出委派给宿主，自身只做渲染与交互。此时**不产生任何 /apiv2
+业务请求**，也不需要专用浏览器 Profile。
+
+> [!WARNING]
+> 这条通道的产物由宿主的生成器决定。内置参考渲染器只覆盖文本、背景与淡入淡出，**不含**
+> 图片、形状、图表、元素动画与字体嵌入，也过不了 `export_pptx.py` 的可编辑性验收。
+> 需要官方画质时请勿使用本节，改用登录后的默认导出。
+
 ## 兼容性说明
 
 这是针对当前公开实现的兼容宿主，不是稳定的官方 SDK。Kimi 更新前端资源哈希、PPTD 格式或 iframe/RPC 协议后，本项目可能需要同步升级。成功生成 PPTX 也不代表 PowerPoint、WPS 和 Keynote 对所有动画效果都能完全一致地播放。

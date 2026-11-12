@@ -1,3 +1,16 @@
+## [Unreleased]
+
+### 新增
+- 宿主侧导出通道（可选）：`export_host.html?hostExport=1` 会向编辑器声明 `sdkExportMode=external`
+  并实现 `handleExport`，使 SDK 模式在**无 Kimi 账号**时也能导出 PPTX（编辑器降级为渲染器）。
+- `scripts/export_pptx_host.py`：无登录、无专用 Profile 的导出入口，支持 `--pptx`（外部产物）
+  与 `--auto-generate`（内置参考渲染器）。
+- `scripts/pptd_to_pptx.py`：PPTX 参考渲染器（文本 / 背景 / 淡入淡出 / 页序），仅作占位实现。
+
+### 说明
+- 默认行为未变：不带 `?hostExport=1` 时与旧路径完全一致，仍需登录走官方服务端渲染。
+- 参考渲染器**不产出**官方级画质（无图片/形状/图表/元素动画，不嵌字体）；需要官方效果请继续使用 `export_pptx.py`。
+
 # 更新日志
 
 [简体中文](CHANGELOG.md) | [English](CHANGELOG_EN.md)
