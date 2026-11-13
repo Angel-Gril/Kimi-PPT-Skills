@@ -8,16 +8,24 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Optional host-side export downloads a prepared PPTX without a Kimi account or persistent browser profile; the default exporter is unchanged.
-- `export_pptx_host.py` accepts `--pptx` or the limited `--auto-generate` renderer; `pptd_to_pptx.py` can generate reference files directly.
-- Reference rendering preserves YAML/JSON text, geometry, font sizes, theme colors, solid backgrounds, fade transitions and page order.
+- Optional host-side export without a Kimi account or persistent browser profile; the default official exporter is unchanged.
+- `export_pptx_host.py --auto-generate` renders the editor's latest saved `fileContent` at export time; `--pptx` keeps fixed-file semantics.
+- `pptd_to_pptx.py` generates reference files directly, and `build_from_files()` renders in-memory YAML/JSON projects.
+- Reference rendering preserves text, geometry, font sizes, theme colors, solid backgrounds, fade transitions and page order.
+
+### Fixed
+
+- Preserve the real editor's saved `rgb()/rgba()` text colors and opacity, preventing white text on dark backgrounds from turning black.
+- Report the current rendered page count after pages are added or removed.
+- Consolidate duplicate Unreleased entries and remove broken escape characters from file and function names.
 
 ### Security and validation
 
-- Reuse project path boundaries, referenced-image filtering and media limits; validate PPTX relationships, page counts and downloaded content.
-- Pass file bytes through host RPC to support current browser restrictions on local-network access.
-- Preserve existing output unless `--force` is supplied, using output locks and transactional writes. Display a persistent notice that the download is a prepared artifact.
-- Add regression coverage for both new entry points and default-host compatibility; run Node tests in CI.
+- Reuse project path boundaries, referenced-image filtering and media limits; validate PPTX relationships, XML, page counts and downloaded content.
+- Pass file bytes through host RPC to support browser local-network restrictions; limit JSON render requests to the current host session.
+- Record each render's digest and page count separately so concurrent requests cannot overwrite another download's validation state. Reject invalid file structures, absolute paths, `..` and duplicate paths.
+- Preserve existing output unless `--force` is supplied, using output locks and transactional writes.
+- Add regression coverage for real saved formats, page changes, request isolation, concurrent rendering and malformed inputs; run Node tests in CI.
 
 ### Limitations
 

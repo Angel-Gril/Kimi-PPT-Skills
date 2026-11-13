@@ -20,7 +20,7 @@ import zipfile
 import tempfile
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 from xml.sax.saxutils import escape
 
 import yaml
@@ -128,6 +128,24 @@ def _color(value: str, colors: Dict[str, str]) -> str:
             raise ExportError(f"unknown or cyclic theme color: {value}")
         seen.add(value)
         value = colors[value[1:]]
+    if isinstance(value, str):
+        value = value.strip()
+        css = re.fullmatch(r"rgba?\(([^)]+)\)", value, re.I)
+        if css:
+            channels = re.split(r"\s*[,/]\s*|\s+", css.group(1).strip())
+            if len(channels) not in (3, 4):
+                raise ExportError(f"unsupported reference-renderer color: {value}")
+            converted = []
+            for index, channel in enumerate(channels):
+                maximum = 100 if channel.endswith("%") else (1 if index == 3 else 255)
+                try:
+                    number = float(channel.removesuffix("%"))
+                except ValueError as exc:
+                    raise ExportError(f"invalid CSS color: {value}") from exc
+                if not math.isfinite(number) or not 0 <= number <= maximum:
+                    raise ExportError(f"CSS color channel out of range: {value}")
+                converted.append(f"{round(number / maximum * 255):02X}")
+            return "".join(converted)
     if not isinstance(value, str) or not re.fullmatch(r"#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?|#[0-9A-Fa-f]{4}(?:[0-9A-Fa-f]{4})?", value):
         raise ExportError(f"unsupported reference-renderer color: {value}")
     value = value[1:]
@@ -147,6 +165,14 @@ def _numbers(value: Any, count: int, label: str) -> List[float]:
     if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in value):
         raise ExportError(f"{label} must contain finite numbers")
     return [float(v) for v in value]
+
+
+def _mapping(value: Any, label: str) -> Dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ExportError(f"{label} must be a mapping")
+    return value
 
 
 def _text_box(shape_id: int, name: str, bounds: List[float], text: str,
@@ -209,9 +235,10 @@ def _parse_text_elements(raw: str, theme: Optional[Dict[str, Any]] = None) -> Tu
         raise ExportError(f"invalid page YAML: {exc}") from exc
     if not isinstance(page, dict) or not isinstance(page.get("elements"), list):
         raise ExportError("page must be a mapping with an elements array")
-    theme = theme or {}
-    colors = theme.get("colors") or {}
-    background = page.get("background") or {}
+    theme = _mapping(theme, "theme")
+    colors = _mapping(theme.get("colors"), "theme colors")
+    text_styles = _mapping(theme.get("textStyles"), "theme text styles")
+    background = _mapping(page.get("background"), "page background")
     bg_color = _color(background.get("color", "#FFFFFF"), colors) if background.get("type", "solid") == "solid" else "FFFFFF"
     texts = []
     for element in page["elements"]:
@@ -219,21 +246,31 @@ def _parse_text_elements(raw: str, theme: Optional[Dict[str, Any]] = None) -> Tu
             raise ExportError("page elements must be mappings")
         if element.get("elementType") != "text":
             continue
-        content = element.get("content") or {}
+        content = _mapping(element.get("content"), "text content")
         style_name = str(content.get("style") or "").lstrip("$")
-        style = {**(theme.get("textStyles", {}).get(style_name) or {}), **content}
-        html = str(content.get("text") or "")
+        style = {**_mapping(text_styles.get(style_name), "theme text style"), **content}
+        html = content.get("text", "")
+        if not isinstance(html, str):
+            raise ExportError("text content must contain a text string")
         size = re.search(r"font-size:\s*(\d+(?:\.\d+)?)(?:px|pt)", html, re.I)
-        color = re.search(r"(?:[;\"']|^)\s*color:\s*(#[0-9A-Fa-f]{3,8}|\$[\w-]+)", html)
+        color = re.search(
+            r"(?:[;\"']|^)\s*color:\s*(rgba?\([^)]*\)|#[0-9A-Fa-f]{3,8}|\$[\w-]+)",
+            html, re.I,
+        )
         bounds = _numbers(element.get("bounds"), 4, "text bounds")
         if bounds[2] <= 0 or bounds[3] <= 0:
             raise ExportError("text bounds width and height must be positive")
-        size_pt = float(size.group(1)) if size else float(style.get("fontSize", 18))
+        try:
+            size_pt = float(size.group(1)) if size else float(style.get("fontSize", 18))
+        except (ValueError, TypeError) as exc:
+            raise ExportError("text fontSize must be a number") from exc
         if not math.isfinite(size_pt) or not 1 <= size_pt <= 4000:
             raise ExportError("text fontSize must be between 1 and 4000")
         align = style.get("align", ["left", "top"])
         if not isinstance(align, list) or len(align) != 2:
             raise ExportError("text align must contain horizontal and vertical alignment")
+        if align[0] not in ("left", "center", "right", "justify") or align[1] not in ("top", "middle", "bottom"):
+            raise ExportError("unsupported text alignment")
         font = style.get("fontFamily", "MiSans")
         if isinstance(font, dict):
             font = font.get("ea") or font.get("latin") or "MiSans"
@@ -249,27 +286,22 @@ def _parse_text_elements(raw: str, theme: Optional[Dict[str, Any]] = None) -> Tu
     return bg_color, texts
 
 
-def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
-    """Render a PPTD project into PPTX bytes."""
-    manifest_path = Path(manifest_path).resolve()
-    _, manifest = read_yaml_mapping(manifest_path)
-    root = manifest_path.parent
+def _validate_manifest(manifest: Dict[str, Any]) -> List[Any]:
+    """Shared manifest checks for the disk and in-memory entry points."""
     if manifest.get("version") != "v2":
         raise ExportError("reference rendering requires PPTD version: v2")
-    width, height = _numbers(manifest.get("size", [960, 540]), 2, "slide size")
-    if width <= 0 or height <= 0:
-        raise ExportError("slide size must be positive")
     page_refs = manifest.get("pages")
     if not isinstance(page_refs, list) or not page_refs:
         raise ExportError("PPTD manifest must contain a non-empty pages list")
+    return page_refs
 
-    pages = []
-    for reference in page_refs:
-        path = safe_project_path(root, reference)
-        if not path.is_file():
-            raise SystemExit(f"missing page file: {reference}")
-        bg_color, texts = _parse_text_elements(path.read_text(encoding="utf-8"), manifest.get("theme"))
-        pages.append({"bgColor": bg_color, "texts": texts})
+
+def _render(manifest: Dict[str, Any], pages: List[Dict[str, Any]],
+            title: str) -> Tuple[bytes, Dict[str, Any]]:
+    """Assemble PPTX parts from already-parsed pages."""
+    width, height = _numbers(manifest.get("size", [960, 540]), 2, "slide size")
+    if width <= 0 or height <= 0:
+        raise ExportError("slide size must be positive")
 
     count = len(pages)
     entries: List[Tuple[str, str]] = []
@@ -332,12 +364,100 @@ def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
         for name, data in entries:
             archive.writestr(name, data)
     summary = {
-        "title": str(manifest.get("title") or manifest_path.stem),
+        "title": title,
         "slides": count,
         "bytes": len(buffer.getvalue()),
         "renderer": "pptd_to_pptx (text/background/fade only)",
     }
     return buffer.getvalue(), summary
+
+
+def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
+    """Render a PPTD project on disk into PPTX bytes."""
+    manifest_path = Path(manifest_path).resolve()
+    _, manifest = read_yaml_mapping(manifest_path)
+    page_refs = _validate_manifest(manifest)
+    root = manifest_path.parent
+    pages = []
+    for reference in page_refs:
+        path = safe_project_path(root, reference)
+        if not path.is_file():
+            raise SystemExit(f"missing page file: {reference}")
+        bg_color, texts = _parse_text_elements(
+            path.read_text(encoding="utf-8"), manifest.get("theme")
+        )
+        pages.append({"bgColor": bg_color, "texts": texts})
+    return _render(manifest, pages, str(manifest.get("title") or manifest_path.stem))
+
+
+def _normalize_fs_path(value: Any) -> str:
+    """Normalize a virtual path and reject anything that escapes the project."""
+    if not isinstance(value, str) or not value or re.search(r"[\x00-\x1F\x7F]", value):
+        raise ExportError("virtual paths must be non-empty strings without control characters")
+    text = value.replace("\\", "/")
+    if text.startswith("/") or ":" in text or ".." in text.split("/"):
+        raise ExportError(f"unsafe virtual path: {value!r}")
+    normalized = "/".join(part for part in text.split("/") if part not in ("", "."))
+    if not normalized:
+        raise ExportError(f"unsafe virtual path: {value!r}")
+    return normalized
+
+
+def _normalize_files(files: Any) -> Dict[str, str]:
+    if isinstance(files, Mapping):
+        entries = files.items()
+    elif isinstance(files, list):
+        if any(not isinstance(item, dict) or "path" not in item or "content" not in item for item in files):
+            raise ExportError("each virtual file must contain a path and text content")
+        entries = ((item["path"], item["content"]) for item in files)
+    else:
+        raise ExportError("virtual file system must be a mapping or file list")
+    virtual = {}
+    for path, content in entries:
+        key = _normalize_fs_path(path)
+        if not isinstance(content, str):
+            raise ExportError("virtual file content must be text")
+        if key in virtual:
+            raise ExportError(f"duplicate virtual path: {key}")
+        virtual[key] = content
+    if not virtual:
+        raise ExportError("virtual file system is empty")
+    return virtual
+
+
+def build_from_files(files: Any,
+                     fallback_title: str = "presentation") -> Tuple[bytes, Dict[str, Any]]:
+    """Render the editor's virtual file system into PPTX bytes.
+
+    The argument is the payload the editor sends to the host on save
+    (fileContent): a list of path/content objects or a mapping of paths to text.
+    Rendering from it means
+    the export matches what is currently on screen instead of a snapshot taken
+    before the editor opened.
+    """
+    virtual = _normalize_files(files)
+    manifests = sorted(path for path in virtual if path.endswith(".pptd") and "/" not in path)
+    if not manifests:
+        raise ExportError("virtual file system has no root .pptd manifest")
+    if len(manifests) != 1:
+        raise ExportError("virtual file system must have exactly one root .pptd manifest")
+    manifest_key = manifests[0]
+    try:
+        manifest = yaml.safe_load(virtual[manifest_key]) or {}
+    except yaml.YAMLError as exc:
+        raise ExportError(f"invalid PPTD manifest: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ExportError("PPTD manifest must be a mapping")
+    page_refs = _validate_manifest(manifest)
+    pages = []
+    for reference in page_refs:
+        key = _normalize_fs_path(reference)
+        if key not in virtual:
+            raise ExportError(f"missing page file: {reference}")
+        bg_color, texts = _parse_text_elements(virtual[key], manifest.get("theme"))
+        pages.append({"bgColor": bg_color, "texts": texts})
+    title = str(manifest.get("title") or fallback_title or Path(manifest_key).stem)
+    return _render(manifest, pages, title)
 
 
 def main(argv=None) -> int:
