@@ -84,6 +84,35 @@
         const hostPptxUrl = hostExport
           ? new URL(bootstrap.get("pptx") || "./deck.pptx", location.href).href
           : null;
+        const liveRender = hostExport && bootstrap.get("render") === "1";
+        let latestSave = null;
+
+        async function fetchStaticDeck() {
+          const response = await fetch(hostPptxUrl, { cache: "no-store" });
+          if (!response.ok) throw new Error(`host PPTX HTTP ${response.status}`);
+          const blob = await response.blob();
+          if (!blob.size) throw new Error("host PPTX is empty");
+          return blob;
+        }
+
+        async function renderLiveDeck() {
+          const deck = latestSave || {
+            files: [
+              { path: payload.manifestPath, content: payload.manifestContent },
+              ...(payload.pages || []),
+            ],
+            title: payload.title,
+          };
+          const response = await fetch("./render-pptx", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(deck),
+          });
+          if (!response.ok) throw new Error(`live render HTTP ${response.status}`);
+          const blob = await response.blob();
+          if (!blob.size) throw new Error("live render returned no bytes");
+          return blob;
+        }
 
         const payload = await fetch("./payload.json", { cache: "no-store" }).then((response) => {
           if (!response.ok) throw new Error(`payload HTTP ${response.status}`);
@@ -132,10 +161,9 @@
                   ...(hostExport
                     ? {
                         async handleExport() {
-                          const response = await fetch(hostPptxUrl, { cache: "no-store" });
-                          if (!response.ok) throw new Error(`host PPTX HTTP ${response.status}`);
-                          const artifact = await response.blob();
-                          if (!artifact.size) throw new Error("host PPTX is empty");
+                          // Live mode re-renders the editor's latest autosave through the
+                          // host backend; fixed mode hands back the pre-rendered file.
+                          const artifact = liveRender ? await renderLiveDeck() : await fetchStaticDeck();
                           // Pass the bytes through RPC so the remote iframe does not
                           // need permission to fetch a localhost URL.
                           const downloadUrl = await new Promise((resolve, reject) => {
@@ -155,6 +183,13 @@
                       }
                     : {}),
                   onSave(savePayload) {
+                    if (liveRender && Array.isArray(savePayload?.fileContent)) {
+                      latestSave = {
+                        files: savePayload.fileContent,
+                        title: savePayload.title || payload.title,
+                      };
+                      status.textContent = "已接收最新编辑内容，导出将反映当前页面";
+                    }
                     return {
                       fileContent: savePayload?.fileContent,
                       lastModifiedTime: Date.now(),
@@ -190,7 +225,11 @@
               await remote.setEditable(true);
               window.exportSlideStatus = await remote.getSlideStatus();
               setStatus("ready");
-              if (hostExport) status.textContent = "宿主导出下载预先生成的文件；页面编辑不会更新该文件";
+              if (hostExport) {
+                status.textContent = liveRender
+                  ? "导出将反映编辑器中的最新内容"
+                  : "宿主导出下载预先生成的文件；页面编辑不会更新该文件";
+              }
             } catch (error) {
               window.exportHostError = String(error?.stack || error);
               setStatus("error");

@@ -257,11 +257,13 @@ python skills/open-kimi-ppt/scripts/export_pptx_host.py \
 python skills/open-kimi-ppt/scripts/pptd_to_pptx.py example/dji-pocket4/dji-pocket4.pptd out.pptx
 ```
 
-The host page opts in with `?hostExport=1`, sets `sdkExportMode=external`, and
-returns the prepared file from `handleExport`. Later edits in the editor do not
-update the prepared download; the host displays a persistent notice. File bytes
-are passed through host RPC without granting the remote page local-network access.
-The browser channel still
+The host page opts in with `?hostExport=1` and sets `sdkExportMode=external`.
+`--auto-generate` renders live: every editor autosave hands the host the current
+virtual file system (`fileContent`), and the export re-renders that latest content,
+so edits made in the browser reach the download. `--pptx` replays a fixed artifact
+instead, where later edits are ignored and the host says so. File bytes are passed
+through host RPC without granting the remote page local-network access. The browser
+channel still
 requires network access to Kimi and may make anonymous account requests; it does
 not use authenticated export signatures or a persistent browser profile.
 

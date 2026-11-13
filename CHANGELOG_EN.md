@@ -23,6 +23,21 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 - Mixed rich-text styling is simplified. Images, shapes, charts, element animations and font embedding are omitted; use `export_pptx.py` for the official writer.
 
+## [Unreleased]
+
+### Changed
+
+- Host-side export now renders live: --auto-generate re-renders the editor's latest
+  onSave virtual file system (ileContent), so the download matches the current deck.
+  --pptx keeps the fixed-artifact semantics and logs that edits are ignored.
+- pptd_to_pptx.build_from_files() renders an in-memory PPTD file system (with traversal checks).
+- xport_pptx_host.py exposes POST /render-pptx and verifies live renders by digest.
+
+### Tests
+
+- Added 	est_host_live_export.py covering in-memory rendering, edit propagation,
+  editor list shapes, traversal rejection and the render endpoint.
+
 ## [1.2.0] - 2026-08-12
 
 ### Added

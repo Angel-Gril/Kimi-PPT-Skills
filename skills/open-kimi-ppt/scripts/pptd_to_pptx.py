@@ -20,7 +20,7 @@ import zipfile
 import tempfile
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 from xml.sax.saxutils import escape
 
 import yaml
@@ -249,27 +249,22 @@ def _parse_text_elements(raw: str, theme: Optional[Dict[str, Any]] = None) -> Tu
     return bg_color, texts
 
 
-def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
-    """Render a PPTD project into PPTX bytes."""
-    manifest_path = Path(manifest_path).resolve()
-    _, manifest = read_yaml_mapping(manifest_path)
-    root = manifest_path.parent
+def _validate_manifest(manifest: Dict[str, Any]) -> List[Any]:
+    """Shared manifest checks for the disk and in-memory entry points."""
     if manifest.get("version") != "v2":
         raise ExportError("reference rendering requires PPTD version: v2")
-    width, height = _numbers(manifest.get("size", [960, 540]), 2, "slide size")
-    if width <= 0 or height <= 0:
-        raise ExportError("slide size must be positive")
     page_refs = manifest.get("pages")
     if not isinstance(page_refs, list) or not page_refs:
         raise ExportError("PPTD manifest must contain a non-empty pages list")
+    return page_refs
 
-    pages = []
-    for reference in page_refs:
-        path = safe_project_path(root, reference)
-        if not path.is_file():
-            raise SystemExit(f"missing page file: {reference}")
-        bg_color, texts = _parse_text_elements(path.read_text(encoding="utf-8"), manifest.get("theme"))
-        pages.append({"bgColor": bg_color, "texts": texts})
+
+def _render(manifest: Dict[str, Any], pages: List[Dict[str, Any]],
+            title: str) -> Tuple[bytes, Dict[str, Any]]:
+    """Assemble PPTX parts from already-parsed pages."""
+    width, height = _numbers(manifest.get("size", [960, 540]), 2, "slide size")
+    if width <= 0 or height <= 0:
+        raise ExportError("slide size must be positive")
 
     count = len(pages)
     entries: List[Tuple[str, str]] = []
@@ -332,12 +327,74 @@ def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
         for name, data in entries:
             archive.writestr(name, data)
     summary = {
-        "title": str(manifest.get("title") or manifest_path.stem),
+        "title": title,
         "slides": count,
         "bytes": len(buffer.getvalue()),
         "renderer": "pptd_to_pptx (text/background/fade only)",
     }
     return buffer.getvalue(), summary
+
+
+def build(manifest_path: Path) -> Tuple[bytes, Dict[str, Any]]:
+    """Render a PPTD project on disk into PPTX bytes."""
+    manifest_path = Path(manifest_path).resolve()
+    _, manifest = read_yaml_mapping(manifest_path)
+    page_refs = _validate_manifest(manifest)
+    root = manifest_path.parent
+    pages = []
+    for reference in page_refs:
+        path = safe_project_path(root, reference)
+        if not path.is_file():
+            raise SystemExit(f"missing page file: {reference}")
+        bg_color, texts = _parse_text_elements(
+            path.read_text(encoding="utf-8"), manifest.get("theme")
+        )
+        pages.append({"bgColor": bg_color, "texts": texts})
+    return _render(manifest, pages, str(manifest.get("title") or manifest_path.stem))
+
+
+def _normalize_fs_path(value: Any) -> str:
+    """Normalize a virtual path and reject anything that escapes the project."""
+    text = str(value or "").replace("\\", "/").lstrip("/")
+    while text.startswith("./"):
+        text = text[2:]
+    if not text or text == ".." or text.startswith("../") or "/../" in text:
+        raise ExportError(f"unsafe virtual path: {value!r}")
+    return text
+
+
+def build_from_files(files: Mapping[str, str],
+                     fallback_title: str = "presentation") -> Tuple[bytes, Dict[str, Any]]:
+    """Render the editor's virtual file system into PPTX bytes.
+
+    The argument is the payload the editor sends to the host on save
+    (fileContent): a mapping of virtual path to text. Rendering from it means
+    the export matches what is currently on screen instead of a snapshot taken
+    before the editor opened.
+    """
+    if not isinstance(files, Mapping) or not files:
+        raise ExportError("virtual file system is empty")
+    virtual = {_normalize_fs_path(path): str(content) for path, content in files.items()}
+    manifests = sorted(path for path in virtual if path.endswith(".pptd") and "/" not in path)
+    if not manifests:
+        raise ExportError("virtual file system has no root .pptd manifest")
+    manifest_key = manifests[0]
+    try:
+        manifest = yaml.safe_load(virtual[manifest_key]) or {}
+    except yaml.YAMLError as exc:
+        raise ExportError(f"invalid PPTD manifest: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise ExportError("PPTD manifest must be a mapping")
+    page_refs = _validate_manifest(manifest)
+    pages = []
+    for reference in page_refs:
+        key = _normalize_fs_path(reference)
+        if key not in virtual:
+            raise ExportError(f"missing page file: {reference}")
+        bg_color, texts = _parse_text_elements(virtual[key], manifest.get("theme"))
+        pages.append({"bgColor": bg_color, "texts": texts})
+    title = str(manifest.get("title") or fallback_title or Path(manifest_key).stem)
+    return _render(manifest, pages, title)
 
 
 def main(argv=None) -> int:
