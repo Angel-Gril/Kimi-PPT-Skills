@@ -92,7 +92,7 @@
           if (!response.ok) throw new Error(`host PPTX HTTP ${response.status}`);
           const blob = await response.blob();
           if (!blob.size) throw new Error("host PPTX is empty");
-          return blob;
+          return { artifact: blob, pageCount: (payload.pages || []).length };
         }
 
         async function renderLiveDeck() {
@@ -105,13 +105,18 @@
           };
           const response = await fetch("./render-pptx", {
             method: "POST",
-            headers: { "content-type": "application/json" },
+            headers: {
+              "content-type": "application/json",
+              "X-Render-Token": payload.renderToken || "",
+            },
             body: JSON.stringify(deck),
           });
           if (!response.ok) throw new Error(`live render HTTP ${response.status}`);
           const blob = await response.blob();
           if (!blob.size) throw new Error("live render returned no bytes");
-          return blob;
+          const pageCount = Number(response.headers.get("X-Render-Pages"));
+          if (!Number.isInteger(pageCount) || pageCount < 1) throw new Error("invalid live render page count");
+          return { artifact: blob, pageCount };
         }
 
         const payload = await fetch("./payload.json", { cache: "no-store" }).then((response) => {
@@ -163,7 +168,7 @@
                         async handleExport() {
                           // Live mode re-renders the editor's latest autosave through the
                           // host backend; fixed mode hands back the pre-rendered file.
-                          const artifact = liveRender ? await renderLiveDeck() : await fetchStaticDeck();
+                          const { artifact, pageCount } = liveRender ? await renderLiveDeck() : await fetchStaticDeck();
                           // Pass the bytes through RPC so the remote iframe does not
                           // need permission to fetch a localhost URL.
                           const downloadUrl = await new Promise((resolve, reject) => {
@@ -175,7 +180,7 @@
                           return {
                             downloadUrl,
                             sizeBytes: artifact.size,
-                            pageCount: (payload.pages || []).length,
+                            pageCount,
                             reused: false,
                             checkFailReason: "",
                           };

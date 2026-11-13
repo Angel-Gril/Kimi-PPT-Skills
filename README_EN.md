@@ -267,6 +267,12 @@ channel still
 requires network access to Kimi and may make anonymous account requests; it does
 not use authenticated export signatures or a persistent browser profile.
 
+Live rendering preserves the editor's saved `rgb()/rgba()` text colors and
+opacity, and reports the current page count. Render requests are limited to the
+current host session and each download is checked against its own render result.
+Invalid file structures, absolute paths, `..` segments and duplicate file paths
+are rejected.
+
 Both entry points check project paths and preserve existing outputs unless
 `--force` is supplied. Supplied PPTX files must have a valid package structure
 and the same page count as the project. Downloads are checked against the host

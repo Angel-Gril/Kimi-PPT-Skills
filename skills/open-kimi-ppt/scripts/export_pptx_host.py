@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import secrets
 import shutil
 import tempfile
 import threading
@@ -68,11 +69,20 @@ def validate_artifact(path: Path, expected_slides: int) -> None:
 class _HostHandler(SimpleHTTPRequestHandler):
     """Static host files plus a POST endpoint that renders the live deck."""
 
-    render_state: Dict[str, Any] = {}
+    render_state: Dict[str, Any]
+    host_origin: str
 
     def do_POST(self) -> None:  # noqa: N802 - http.server naming
         if self.path.split("?")[0] != RENDER_PATH:
             self.send_error(404, "unknown endpoint")
+            return
+        if (self.headers.get("Origin") != self.host_origin
+                or not secrets.compare_digest(self.headers.get("X-Render-Token", "").encode("utf-8"),
+                                              self.render_state["token"].encode("utf-8"))):
+            self.send_error(403, "render request is not from this host session")
+            return
+        if self.headers.get_content_type() != "application/json":
+            self.send_error(415, "render body must use application/json")
             return
         try:
             length = int(self.headers.get("content-length") or 0)
@@ -82,32 +92,31 @@ class _HostHandler(SimpleHTTPRequestHandler):
             self.send_error(413, "unsupported render body size")
             return
         try:
-            request = json.loads(self.rfile.read(length).decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
+            request = json.loads(self.rfile.read(length).decode("utf-8"), object_pairs_hook=_unique_object)
+        except (UnicodeDecodeError, json.JSONDecodeError, ExportError, RecursionError):
             self.send_error(400, "render body must be JSON")
             return
 
-        files = request.get("files")
-        if isinstance(files, list):
-            files = {
-                str(item.get("path")): item.get("content", "")
-                for item in files
-                if isinstance(item, dict) and item.get("path")
-            }
+        if not isinstance(request, dict) or not isinstance(request.get("title", "presentation"), str):
+            self.send_error(400, "render body must be an object with an optional text title")
+            return
         from pptd_to_pptx import build_from_files
 
         try:
-            data, info = build_from_files(files, str(request.get("title") or "presentation"))
-        except ExportError as exc:
-            self.send_error(400, str(exc))
+            data, info = build_from_files(request.get("files"), request.get("title") or "presentation")
+        except (ExportError, ValueError, TypeError, RecursionError):
+            self.send_error(400, "invalid PPTD virtual file system")
             return
 
-        self.render_state["digest"] = hashlib.sha256(data).digest()
-        self.render_state["slides"] = info["slides"]
+        # Keep each result bound to its own bytes; later requests cannot replace
+        # the expected digest or page count of a download already in progress.
+        digest = hashlib.sha256(data).hexdigest()
+        self.render_state["renders"][digest] = info["slides"]
         self.send_response(200)
         self.send_header("Content-Type",
                          "application/vnd.openxmlformats-officedocument.presentationml.presentation")
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("X-Render-Pages", str(info["slides"]))
         self.send_header("Content-Disposition", 'attachment; filename="deck.pptx"')
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
@@ -117,7 +126,26 @@ class _HostHandler(SimpleHTTPRequestHandler):
         pass
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ExportError("duplicate JSON field")
+        result[key] = value
+    return result
+
+
+def validate_live_download(path: Path, render_state: Dict[str, Any]) -> None:
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    slides = render_state.get("renders", {}).get(digest)
+    if slides is None:
+        raise ExportError("downloaded PPTX does not match a live render in this host session")
+    validate_artifact(path, slides)
+
+
 def serve_host(directory: Path, render_state: Dict[str, Any]) -> Tuple[ThreadingHTTPServer, threading.Thread, str]:
+    render_state.setdefault("token", secrets.token_urlsafe(32))
+    render_state.setdefault("renders", {})
     handler: Type[SimpleHTTPRequestHandler] = type(
         "BoundHostHandler",
         (_HostHandler,),
@@ -127,8 +155,9 @@ def serve_host(directory: Path, render_state: Dict[str, Any]) -> Tuple[Threading
         ("127.0.0.1", 0), partial(handler, directory=str(directory))
     )
     thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
     host, port = server.server_address[:2]
+    handler.host_origin = f"http://{host}:{port}"
+    thread.start()
     return server, thread, f"http://{host}:{port}/export_host.html"
 
 
@@ -148,7 +177,7 @@ def export_host(args: argparse.Namespace) -> Path:
             raise ExportError(f"output already exists (pass --force to replace it): {output}")
         payload = build_payload(manifest)
         total_pages = len(payload["pages"])
-        render_state: Dict[str, Any] = {}
+        render_state: Dict[str, Any] = {"token": secrets.token_urlsafe(32)}
         with tempfile.TemporaryDirectory(prefix="open-kimi-ppt-host-export-") as temp_name:
             temp_dir = Path(temp_name)
             artifact = temp_dir / "deck.pptx"
@@ -175,6 +204,7 @@ def export_host(args: argparse.Namespace) -> Path:
                 raise ExportError("playwright is required: pip install -r skills/open-kimi-ppt/requirements.txt") from exc
 
             shutil.copy2(HOST_TEMPLATE, temp_dir / HOST_TEMPLATE.name)
+            payload["renderToken"] = render_state["token"]
             (temp_dir / "payload.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
             server, thread, url = serve(temp_dir, render_state)
             downloaded = temp_dir / "download.pptx"
@@ -208,15 +238,7 @@ def export_host(args: argparse.Namespace) -> Path:
                 thread.join(timeout=2)
 
             if args.auto_generate:
-                digest = render_state.get("digest")
-                if not digest:
-                    raise ExportError(
-                        "the editor never saved before export, so no live deck was rendered; "
-                        "open the deck once or use --pptx"
-                    )
-                if hashlib.sha256(downloaded.read_bytes()).digest() != digest:
-                    raise ExportError("downloaded PPTX does not match the live render")
-                validate_artifact(downloaded, int(render_state.get("slides") or total_pages))
+                validate_live_download(downloaded, render_state)
             else:
                 if hashlib.sha256(downloaded.read_bytes()).digest() != hashlib.sha256(artifact.read_bytes()).digest():
                     raise ExportError("downloaded PPTX does not match the host artifact")
